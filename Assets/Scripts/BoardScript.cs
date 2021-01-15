@@ -9,20 +9,35 @@ public class BoardScript : MonoBehaviour
     public GameObject boardSquareTemplate;
     public GameObject tileParent;
 
-    void MouseHitGameObject (GameObject obj, bool isClicking) {
-        if (isClicking) {
-            if (obj == gameObject) {    // board
-                float boardWidth = gameObject.GetComponent<Renderer>().bounds.size[0];
-                float boardHeight = gameObject.GetComponent<Renderer>().bounds.size[1];
-                int numRows = 10;
-                int numCols = 10;
-                
+    private GameObject currentTile;
+
+    bool objectIsTile (GameObject obj) {
+        return obj.transform.parent == tileParent.transform;
+    }
+
+    void ResetHighlightedTile (GameObject keepTile = null) {
+        //Debug.Log(keepTile);
+        //Debug.Log(currentTile);
+        //Debug.Log(keepTile == currentTile);
+        if ((currentTile != null) && ((keepTile == null) || (currentTile != keepTile))) {
+            currentTile.GetComponent<HighlightTile>().ResetColor();
+        }
+    }
+
+    void MouseHitGameObject (GameObject obj, bool justClicked, bool mouseDown) {
+        if (objectIsTile(obj)) {
+            ResetHighlightedTile(obj);
+            currentTile = obj;
+            if (mouseDown) {
+                currentTile.GetComponent<HighlightTile>().MouseClicking();
+            } else {
+                currentTile.GetComponent<HighlightTile>().MouseHover();
             }
         }
     }
 
-    void MouseHitNoGameObject (bool isClicking) {
-
+    void MouseHitNoGameObject (bool justClicked, bool mouseDown) {
+        ResetHighlightedTile();
     }
 
     void ResizeTileTemplate (float tileWidth, float tileHeight) {
@@ -39,7 +54,7 @@ public class BoardScript : MonoBehaviour
         float tileHeight = boardHeight / numRows;
         Vector2 lowerLeft = new Vector2(gameObject.transform.position.x - boardWidth / 2, gameObject.transform.position.y - boardHeight / 2);
         float xPos, yPos;
-        float tileZ = 0.0001f;
+        float tileZ = -0.0001f;
 
         ResizeTileTemplate(tileWidth, tileHeight);
 
@@ -65,14 +80,15 @@ public class BoardScript : MonoBehaviour
     {
         Ray ray = cameraObject.GetComponent<CameraScript>().GetCameraRay();
         RaycastHit hit;
-        bool isClicking = Input.GetMouseButtonDown(0);
+        bool justClicked = Input.GetMouseButtonDown(0);
+        bool mouseDown = Input.GetMouseButton(0);
         if (Physics.Raycast(ray, out hit))
         {
-            MouseHitGameObject(hit.transform.gameObject, isClicking);   // sidenote : apparently hit.collider.transform.gameObject is different - see https://forum.unity.com/threads/raycast-on-child-gives-parent-name-in-hit-transform-name.57172/ 
+            MouseHitGameObject(hit.transform.gameObject, justClicked, mouseDown);   // sidenote : apparently hit.collider.transform.gameObject is different - see https://forum.unity.com/threads/raycast-on-child-gives-parent-name-in-hit-transform-name.57172/ 
         }
         else
         {
-            MouseHitNoGameObject(isClicking);
+            MouseHitNoGameObject(justClicked, mouseDown);
         }
     }
 }
