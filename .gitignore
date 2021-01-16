@@ -48,5 +48,6 @@ sysinfo.txt
 crashlytics-build.properties
 
 Assets/Plugins/
+Assets/Plugins.meta
 Packages/
 ProjectSettings/
