@@ -8,36 +8,35 @@ public class BoardScript : MonoBehaviour
     public GameObject cameraObject;
     public GameObject boardSquareTemplate;
     public GameObject tileParent;
+    public GameObject pieceMenuUpArrow;
+    public GameObject pieceMenuDownArrow;
 
-    private GameObject currentTile;
+    private GameObject currentlyOver;
 
     bool objectIsTile (GameObject obj) {
         return obj.transform.parent == tileParent.transform;
     }
 
-    void ResetHighlightedTile (GameObject keepTile = null) {
-        //Debug.Log(keepTile);
-        //Debug.Log(currentTile);
-        //Debug.Log(keepTile == currentTile);
-        if ((currentTile != null) && ((keepTile == null) || (currentTile != keepTile))) {
-            currentTile.GetComponent<HighlightTile>().ResetColor();
+    void ResetHighlighted (GameObject keep = null) {
+        if ((currentlyOver != null) && ((keep == null) || (currentlyOver != keep))) {
+            currentlyOver.GetComponent<Highlight2D>().ResetColor();
         }
     }
 
     void MouseHitGameObject (GameObject obj, bool justClicked, bool mouseDown) {
-        if (objectIsTile(obj)) {
-            ResetHighlightedTile(obj);
-            currentTile = obj;
+        if ((objectIsTile(obj)) || (obj == pieceMenuUpArrow) || (obj == pieceMenuDownArrow)) {
+            ResetHighlighted(obj);
+            currentlyOver = obj;
             if (mouseDown) {
-                currentTile.GetComponent<HighlightTile>().MouseClicking();
+                currentlyOver.GetComponent<Highlight2D>().MouseClicking();
             } else {
-                currentTile.GetComponent<HighlightTile>().MouseHover();
+                currentlyOver.GetComponent<Highlight2D>().MouseHover();
             }
         }
     }
 
     void MouseHitNoGameObject (bool justClicked, bool mouseDown) {
-        ResetHighlightedTile();
+        ResetHighlighted();
     }
 
     void ResizeTileTemplate (float tileWidth, float tileHeight) {
@@ -69,13 +68,11 @@ public class BoardScript : MonoBehaviour
         }
     }
 
-    // Start is called before the first frame update
     void Start()
     {
         InitTiles(10, 10);
     }
 
-    // Update is called once per frame
     void Update()
     {
         Ray ray = cameraObject.GetComponent<CameraScript>().GetCameraRay();

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HighlightTile : MonoBehaviour
+public class Highlight2D : MonoBehaviour
 {
     public Material defaultMaterial;
     public Material mouseOverMaterial;
