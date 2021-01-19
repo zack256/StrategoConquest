@@ -121,6 +121,49 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &32300312
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 32300314}
+  - component: {fileID: 32300313}
+  m_Layer: 0
+  m_Name: MeshMaster
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &32300313
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 32300312}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28c30f594161448568fbea2a39e248dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &32300314
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 32300312}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 6, y: 4, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &74759134
 GameObject:
   m_ObjectHideFlags: 0
@@ -132,8 +175,8 @@ GameObject:
   - component: {fileID: 74759135}
   - component: {fileID: 74759139}
   - component: {fileID: 74759138}
-  - component: {fileID: 74759137}
   - component: {fileID: 74759136}
+  - component: {fileID: 74759137}
   m_Layer: 0
   m_Name: Top Triangle
   m_TagString: Untagged
@@ -168,20 +211,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isTop: 1
---- !u!64 &74759137
-MeshCollider:
+  meshMaster: {fileID: 32300312}
+--- !u!114 &74759137
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 74759134}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 0
-  serializedVersion: 4
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3eb621c7302b6421f9a98bf83f43dd51, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  defaultMaterial: {fileID: 2100000, guid: c8df20a2695604b8a97ebe1fec440b55, type: 2}
+  mouseOverMaterial: {fileID: 2100000, guid: 6c24cc3d76503491fba4e42d1f8fe67b, type: 2}
+  mouseClickMaterial: {fileID: 2100000, guid: 6d780bcbc57af4099950811e5bf9ceeb, type: 2}
 --- !u!23 &74759138
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -265,6 +310,8 @@ MonoBehaviour:
   boardSquareTemplate: {fileID: 7371985912277935756, guid: 7cc10ff1b44624bb0a491143a1610b1a,
     type: 3}
   tileParent: {fileID: 1198387211}
+  pieceMenuUpArrow: {fileID: 74759134}
+  pieceMenuDownArrow: {fileID: 1775069814}
 --- !u!64 &382434859
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -697,8 +744,8 @@ GameObject:
   - component: {fileID: 1775069815}
   - component: {fileID: 1775069818}
   - component: {fileID: 1775069817}
-  - component: {fileID: 1775069816}
   - component: {fileID: 1775069819}
+  - component: {fileID: 1775069816}
   m_Layer: 0
   m_Name: Bottom Triangle
   m_TagString: Untagged
@@ -720,20 +767,21 @@ Transform:
   m_Father: {fileID: 491472330}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!64 &1775069816
-MeshCollider:
+--- !u!114 &1775069816
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1775069814}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 0
-  serializedVersion: 4
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3eb621c7302b6421f9a98bf83f43dd51, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  defaultMaterial: {fileID: 2100000, guid: c8df20a2695604b8a97ebe1fec440b55, type: 2}
+  mouseOverMaterial: {fileID: 2100000, guid: 6c24cc3d76503491fba4e42d1f8fe67b, type: 2}
+  mouseClickMaterial: {fileID: 2100000, guid: 6d780bcbc57af4099950811e5bf9ceeb, type: 2}
 --- !u!23 &1775069817
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -794,3 +842,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isTop: 0
+  meshMaster: {fileID: 32300312}
