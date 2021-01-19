@@ -9,13 +9,9 @@ public class SetImageTexture : MonoBehaviour
     private Material mat;
     private Texture2D tex;
 
-    void CreateTexture () {
-        string assetsDir = Application.dataPath;
-        string filePath = assetsDir + "/Files/Images/Pieces/Good/5.png";
-        byte[] imageData = File.ReadAllBytes(filePath);
-        tex = new Texture2D(2, 2);
-        tex.LoadImage(imageData);
-        mat = new Material(Shader.Find("Specular"));
+    void SaveTexture () {
+        mat = gameObject.GetComponent<Renderer>().material;
+        tex = mat.mainTexture as Texture2D;
     }
 
     void SetTexture () {
@@ -25,7 +21,7 @@ public class SetImageTexture : MonoBehaviour
 
     void Start()
     {
-        CreateTexture();
+        SaveTexture();
     }
 
     void Update()

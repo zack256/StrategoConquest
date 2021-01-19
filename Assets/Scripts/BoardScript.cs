@@ -10,6 +10,8 @@ public class BoardScript : MonoBehaviour
     public GameObject tileParent;
     public GameObject pieceMenuUpArrow;
     public GameObject pieceMenuDownArrow;
+    public GameObject pieceMenuRect;
+    public GameObject goodPiecesParent;
 
     private GameObject currentlyOver;
 
@@ -46,7 +48,7 @@ public class BoardScript : MonoBehaviour
         boardSquareTemplate.transform.localScale = new Vector3(boardSquareTemplate.transform.localScale.x * fracX, boardSquareTemplate.transform.localScale.y * fracY, boardSquareTemplate.transform.localScale.z);
     }
 
-    void InitTiles (int numCols, int numRows) {
+    void InitBoardTiles (int numCols, int numRows) {
         float boardWidth = gameObject.GetComponent<Renderer>().bounds.size[0];
         float boardHeight = gameObject.GetComponent<Renderer>().bounds.size[1];
         float tileWidth = boardWidth / numCols;
@@ -68,9 +70,22 @@ public class BoardScript : MonoBehaviour
         }
     }
 
+    void InitPieceSelector () {
+        Dictionary<string, GameObject[]> piecesDict = gameObject.GetComponent<PiecesScript>().InitPieceQuads("Good", goodPiecesParent);
+        string[] show = new string[] {"2", "3", "4", "5"};
+        Vector3 newPos;
+        float margin = 0.75f;
+        Vector3 rectDims = pieceMenuRect.GetComponent<Renderer>().bounds.size;
+        for (int i = 0; i < show.Length; i++) {
+            newPos = new Vector3(pieceMenuRect.transform.position.x, pieceMenuRect.transform.position.y + rectDims.y / 2 - margin - i * rectDims.y / show.Length, 0);
+            piecesDict[show[i]][0].transform.position = newPos;
+        }
+    }
+
     void Start()
     {
-        InitTiles(10, 10);
+        InitBoardTiles(10, 10);
+        InitPieceSelector();
     }
 
     void Update()

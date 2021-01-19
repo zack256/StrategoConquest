@@ -287,6 +287,7 @@ GameObject:
   - component: {fileID: 382434860}
   - component: {fileID: 382434859}
   - component: {fileID: 382434858}
+  - component: {fileID: 382434863}
   m_Layer: 0
   m_Name: Board
   m_TagString: Untagged
@@ -312,6 +313,8 @@ MonoBehaviour:
   tileParent: {fileID: 1198387211}
   pieceMenuUpArrow: {fileID: 74759134}
   pieceMenuDownArrow: {fileID: 1775069814}
+  pieceMenuRect: {fileID: 666468802}
+  goodPiecesParent: {fileID: 472318670}
 --- !u!64 &382434859
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -387,6 +390,50 @@ Transform:
   - {fileID: 1198387212}
   m_Father: {fileID: 0}
   m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &382434863
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 382434857}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69b7fb58fdf08424894e047e2e6fb1da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  quadImgTemplate: {fileID: 8119326243476569775, guid: b66e2ea902fba4d538282ae30b743229,
+    type: 3}
+--- !u!1 &472318670
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 472318671}
+  m_Layer: 0
+  m_Name: Pieces Parent
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &472318671
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 472318670}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.17773722, y: -0.7417809, z: -5.329965}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &491472329
 GameObject:
