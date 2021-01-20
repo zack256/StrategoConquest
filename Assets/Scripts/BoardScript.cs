@@ -12,8 +12,14 @@ public class BoardScript : MonoBehaviour
     public GameObject pieceMenuDownArrow;
     public GameObject pieceMenuRect;
     public GameObject goodPiecesParent;
+    public GameObject scriptMaster;
 
     private GameObject currentlyOver;
+    private Dictionary<string, int> goodPiecesOnBoard;
+    private string[] pieceOrder = new string[12] {"2", "3", "4", "5", "6", "7", "8", "9", "10", "S", "B", "F"};
+    private int pieceOrderIdx = 0;
+    private Dictionary<string, GameObject[]> piecesDict;
+    private GameObject tileToScale;
 
     bool objectIsTile (GameObject obj) {
         return obj.transform.parent == tileParent.transform;
@@ -33,6 +39,13 @@ public class BoardScript : MonoBehaviour
                 currentlyOver.GetComponent<Highlight2D>().MouseClicking();
             } else {
                 currentlyOver.GetComponent<Highlight2D>().MouseHover();
+            }
+            if ((obj == pieceMenuUpArrow) && justClicked) {
+                PieceSelectorScroll(false);
+                ShowPiecesOnSelector();
+            } else if ((obj == pieceMenuDownArrow) && justClicked) {
+                PieceSelectorScroll(true);
+                ShowPiecesOnSelector();
             }
         }
     }
@@ -70,16 +83,56 @@ public class BoardScript : MonoBehaviour
         }
     }
 
-    void InitPieceSelector () {
-        Dictionary<string, GameObject[]> piecesDict = gameObject.GetComponent<PiecesScript>().InitPieceQuads("Good", goodPiecesParent);
-        string[] show = new string[] {"2", "3", "4", "5"};
+    void ShowPiecesOnSelector () {
+        string[] show = GetPiecesShownOnSelector();
         Vector3 newPos;
-        float margin = 0.75f;
         Vector3 rectDims = pieceMenuRect.GetComponent<Renderer>().bounds.size;
+        float pieceHeight = tileToScale.GetComponent<Renderer>().bounds.size.y;
+        float marginBtwnPieces = (rectDims.y - 4 * pieceHeight) / 5;
         for (int i = 0; i < show.Length; i++) {
-            newPos = new Vector3(pieceMenuRect.transform.position.x, pieceMenuRect.transform.position.y + rectDims.y / 2 - margin - i * rectDims.y / show.Length, 0);
+            newPos = new Vector3(pieceMenuRect.transform.position.x, pieceMenuRect.transform.position.y + rectDims.y / 2 - marginBtwnPieces - pieceHeight / 2 - i * (pieceHeight + marginBtwnPieces), -0.002f);
             piecesDict[show[i]][0].transform.position = newPos;
         }
+    }
+
+    void InitPieceSelector () {
+        pieceOrderIdx = 0;
+        tileToScale = tileParent.transform.GetChild(0).gameObject;
+        piecesDict = gameObject.GetComponent<PiecesScript>().InitPieceQuads("Good", goodPiecesParent, tileToScale);
+        goodPiecesOnBoard = new Dictionary<string, int>();
+        ShowPiecesOnSelector();
+    }
+
+    string[] GetPiecesShownOnSelector () {
+        string piece;
+        string[] res = new string[4];
+        int got = 0;
+        int lenPieceOrder = pieceOrder.Length;
+        for (int i = 0; i < lenPieceOrder; i++) {
+            piece = pieceOrder[(pieceOrderIdx + i) % lenPieceOrder];
+            if ((!goodPiecesOnBoard.ContainsKey(piece)) || (goodPiecesOnBoard[piece] < piecesDict[piece].Length)) {
+                res[got] = piece;
+                got++;
+                if (got == 4) {
+                    break;
+                }
+            }
+        }
+        return res;
+    }
+
+    void PieceSelectorScroll (bool isDown) {
+        if (isDown) {
+            pieceOrderIdx++;
+        } else {
+            pieceOrderIdx--;
+        }
+        pieceOrderIdx = Mod(pieceOrderIdx, pieceOrder.Length);
+    }
+
+    int Mod (int a, int b) {
+        int r = a % b;
+        return r < 0 ? r + b : r;
     }
 
     void Start()

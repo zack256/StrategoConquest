@@ -7,6 +7,7 @@ public class PiecesScript : MonoBehaviour
 {
 
     public GameObject quadImgTemplate;
+    public GameObject scriptMaster;
 
     private Dictionary<string, int> pieceQuantities = new Dictionary<string, int> {
         {"2", 8},
@@ -30,7 +31,8 @@ public class PiecesScript : MonoBehaviour
         return tex;
     }
 
-    public Dictionary<string, GameObject[]> InitPieceQuads (string team, GameObject piecesParent) {
+    public Dictionary<string, GameObject[]> InitPieceQuads (string team, GameObject piecesParent, GameObject tileToScale) {
+        scriptMaster.GetComponent<ScaleScript>().ScaleGameObject(quadImgTemplate, tileToScale);
         string assetsDir = Application.dataPath;
         string piecesTeamsPath = assetsDir + "/Files/Images/Pieces/";
         string localDirPath = piecesTeamsPath + team + "/";

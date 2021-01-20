@@ -7,7 +7,7 @@ public class CreateTriangleMeshes : MonoBehaviour
 {
 
     public bool isTop;
-    public GameObject meshMaster;
+    public GameObject scriptMaster;
 
     int[] CreateTopTriangleMesh (Vector3[] nvs) {
         
@@ -35,7 +35,7 @@ public class CreateTriangleMeshes : MonoBehaviour
         } else {
             newTriangles = CreateBottomTriangleMesh(newVertices);
         }
-        meshMaster.GetComponent<MeshScript>().RedoMesh(gameObject, newVertices, newTriangles);
+        scriptMaster.GetComponent<MeshScript>().RedoMesh(gameObject, newVertices, newTriangles);
     }
 
 }
