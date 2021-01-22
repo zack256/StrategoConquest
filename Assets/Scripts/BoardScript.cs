@@ -15,14 +15,19 @@ public class BoardScript : MonoBehaviour
     public GameObject scriptMaster;
 
     private GameObject currentlyOver;
+    private GameObject currentPiece;
     private Dictionary<string, int> goodPiecesOnBoard;
     private string[] pieceOrder = new string[12] {"2", "3", "4", "5", "6", "7", "8", "9", "10", "S", "B", "F"};
     private int pieceOrderIdx = 0;
     private Dictionary<string, GameObject[]> piecesDict;
     private GameObject tileToScale;
 
-    bool objectIsTile (GameObject obj) {
+    bool ObjectIsTile (GameObject obj) {
         return obj.transform.parent == tileParent.transform;
+    }
+
+    bool ObjectIsPiece (GameObject obj) {
+        return obj.transform.parent == goodPiecesParent.transform;
     }
 
     void ResetHighlighted (GameObject keep = null) {
@@ -31,8 +36,16 @@ public class BoardScript : MonoBehaviour
         }
     }
 
+    void ResetHighlightedPiece () {
+        if (currentPiece) {
+            currentPiece.GetComponent<SetImageTexture>().ToggleMatMode(0);
+            currentPiece = null;
+        }
+    }
+
     void MouseHitGameObject (GameObject obj, bool justClicked, bool mouseDown) {
-        if ((objectIsTile(obj)) || (obj == pieceMenuUpArrow) || (obj == pieceMenuDownArrow)) {
+        ResetHighlightedPiece();
+        if ((ObjectIsTile(obj)) || (obj == pieceMenuUpArrow) || (obj == pieceMenuDownArrow)) {
             ResetHighlighted(obj);
             currentlyOver = obj;
             if (mouseDown) {
@@ -41,17 +54,21 @@ public class BoardScript : MonoBehaviour
                 currentlyOver.GetComponent<Highlight2D>().MouseHover();
             }
             if ((obj == pieceMenuUpArrow) && justClicked) {
-                PieceSelectorScroll(false);
+                PieceSelectorScroll(true);  // up/down..
                 ShowPiecesOnSelector();
             } else if ((obj == pieceMenuDownArrow) && justClicked) {
-                PieceSelectorScroll(true);
+                PieceSelectorScroll(false);
                 ShowPiecesOnSelector();
             }
+        } else if (ObjectIsPiece(obj)) {
+            currentPiece = obj;
+            obj.GetComponent<SetImageTexture>().ToggleMatMode(1);
         }
     }
 
     void MouseHitNoGameObject (bool justClicked, bool mouseDown) {
         ResetHighlighted();
+        ResetHighlightedPiece();
     }
 
     void ResizeTileTemplate (float tileWidth, float tileHeight) {
@@ -92,6 +109,7 @@ public class BoardScript : MonoBehaviour
         for (int i = 0; i < show.Length; i++) {
             newPos = new Vector3(pieceMenuRect.transform.position.x, pieceMenuRect.transform.position.y + rectDims.y / 2 - marginBtwnPieces - pieceHeight / 2 - i * (pieceHeight + marginBtwnPieces), -0.002f);
             piecesDict[show[i]][0].transform.position = newPos;
+            piecesDict[show[i]][0].SetActive(true);
         }
     }
 
@@ -122,11 +140,16 @@ public class BoardScript : MonoBehaviour
     }
 
     void PieceSelectorScroll (bool isDown) {
+        string[] shown = GetPiecesShownOnSelector();
+        string pieceToRemove;
         if (isDown) {
+            pieceToRemove = shown[0];
             pieceOrderIdx++;
         } else {
+            pieceToRemove = shown[3];
             pieceOrderIdx--;
         }
+        piecesDict[pieceToRemove][0].SetActive(false);
         pieceOrderIdx = Mod(pieceOrderIdx, pieceOrder.Length);
     }
 
