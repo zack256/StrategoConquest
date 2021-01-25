@@ -13,6 +13,7 @@ public class BoardScript : MonoBehaviour
     public GameObject pieceMenuRect;
     public GameObject goodPiecesParent;
     public GameObject scriptMaster;
+    public GameObject pieceHighlightScreen;
 
     private GameObject currentlyOver;
     private GameObject currentPiece;
@@ -30,21 +31,18 @@ public class BoardScript : MonoBehaviour
         return obj.transform.parent == goodPiecesParent.transform;
     }
 
+    void MoveScreenOverPiece (GameObject piece) {
+        pieceHighlightScreen.transform.position = new Vector3(piece.transform.position.x, piece.transform.position.y, pieceHighlightScreen.transform.position.z);
+        pieceHighlightScreen.SetActive(true);
+    }
+
     void ResetHighlighted (GameObject keep = null) {
         if ((currentlyOver != null) && ((keep == null) || (currentlyOver != keep))) {
             currentlyOver.GetComponent<Highlight2D>().ResetColor();
         }
     }
 
-    void ResetHighlightedPiece () {
-        if (currentPiece) {
-            currentPiece.GetComponent<SetImageTexture>().ToggleMatMode(0);
-            currentPiece = null;
-        }
-    }
-
     void MouseHitGameObject (GameObject obj, bool justClicked, bool mouseDown) {
-        ResetHighlightedPiece();
         if ((ObjectIsTile(obj)) || (obj == pieceMenuUpArrow) || (obj == pieceMenuDownArrow)) {
             ResetHighlighted(obj);
             currentlyOver = obj;
@@ -60,15 +58,19 @@ public class BoardScript : MonoBehaviour
                 PieceSelectorScroll(false);
                 ShowPiecesOnSelector();
             }
-        } else if (ObjectIsPiece(obj)) {
-            currentPiece = obj;
-            obj.GetComponent<SetImageTexture>().ToggleMatMode(1);
+        }
+        if (ObjectIsPiece(obj)) {
+            //currentPiece = obj;
+            //obj.GetComponent<SetImageTexture>().ToggleMatMode(1);
+            MoveScreenOverPiece(obj);
+        } else {
+            pieceHighlightScreen.SetActive(false);
         }
     }
 
     void MouseHitNoGameObject (bool justClicked, bool mouseDown) {
         ResetHighlighted();
-        ResetHighlightedPiece();
+        pieceHighlightScreen.SetActive(false);
     }
 
     void ResizeTileTemplate (float tileWidth, float tileHeight) {
