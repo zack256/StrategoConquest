@@ -14,6 +14,7 @@ public class BoardScript : MonoBehaviour
     public GameObject goodPiecesParent;
     public GameObject scriptMaster;
     public GameObject pieceHighlightScreen;
+    public GameObject backgroundObj;
 
     private GameObject currentlyOver;
     private GameObject currentPiece;
@@ -22,6 +23,7 @@ public class BoardScript : MonoBehaviour
     private int pieceOrderIdx = 0;
     private Dictionary<string, GameObject[]> piecesDict;
     private GameObject tileToScale;
+    private GameObject grabbedPiece;
 
     bool ObjectIsTile (GameObject obj) {
         return obj.transform.parent == tileParent.transform;
@@ -36,18 +38,53 @@ public class BoardScript : MonoBehaviour
         pieceHighlightScreen.SetActive(true);
     }
 
+    void HidePieceScreen () {
+        pieceHighlightScreen.SetActive(false);
+    }
+
     void ResetHighlighted (GameObject keep = null) {
         if ((currentlyOver != null) && ((keep == null) || (currentlyOver != keep))) {
             currentlyOver.GetComponent<Highlight2D>().ResetColor();
         }
     }
 
-    void MouseHitGameObject (GameObject obj, bool justClicked, bool mouseDown) {
+    void SetGrabbedPiece (GameObject obj) {
+        obj.GetComponent<MeshCollider>().enabled = false;
+        grabbedPiece = obj;
+    }
+
+    void MouseHitGameObject (GameObject obj, bool justClicked, bool mouseDown, Vector3 point) {
+        if (grabbedPiece) {
+            if (mouseDown) {
+                grabbedPiece.transform.position = point;
+                MoveScreenOverPiece(grabbedPiece);
+                if (!ObjectIsTile(obj)) {
+                    return;
+                }
+            } else {
+                grabbedPiece = null;
+                HidePieceScreen();
+            }
+        } else {
+            if (ObjectIsPiece(obj)) {
+                if (justClicked) {
+                    //grabbedPiece = obj;
+                    SetGrabbedPiece(obj);
+                }
+                MoveScreenOverPiece(obj);
+            } else {
+                HidePieceScreen();
+            }
+        }
         if ((ObjectIsTile(obj)) || (obj == pieceMenuUpArrow) || (obj == pieceMenuDownArrow)) {
             ResetHighlighted(obj);
             currentlyOver = obj;
             if (mouseDown) {
-                currentlyOver.GetComponent<Highlight2D>().MouseClicking();
+                if (grabbedPiece) {
+                    currentlyOver.GetComponent<Highlight2D>().MouseWillDrop();
+                } else {
+                    currentlyOver.GetComponent<Highlight2D>().MouseClicking();
+                }
             } else {
                 currentlyOver.GetComponent<Highlight2D>().MouseHover();
             }
@@ -59,18 +96,22 @@ public class BoardScript : MonoBehaviour
                 ShowPiecesOnSelector();
             }
         }
-        if (ObjectIsPiece(obj)) {
-            //currentPiece = obj;
-            //obj.GetComponent<SetImageTexture>().ToggleMatMode(1);
-            MoveScreenOverPiece(obj);
-        } else {
-            pieceHighlightScreen.SetActive(false);
-        }
     }
 
-    void MouseHitNoGameObject (bool justClicked, bool mouseDown) {
+    void MouseHitNoGameObject (bool justClicked, bool mouseDown, Vector3 point) {
         ResetHighlighted();
-        pieceHighlightScreen.SetActive(false);
+
+        if (grabbedPiece) {
+            if (mouseDown) {
+                grabbedPiece.transform.position = point;
+                MoveScreenOverPiece(grabbedPiece);
+            } else {
+                grabbedPiece = null;
+                HidePieceScreen();
+            }
+        } else {
+            HidePieceScreen();
+        }
     }
 
     void ResizeTileTemplate (float tileWidth, float tileHeight) {
@@ -174,11 +215,16 @@ public class BoardScript : MonoBehaviour
         bool mouseDown = Input.GetMouseButton(0);
         if (Physics.Raycast(ray, out hit))
         {
-            MouseHitGameObject(hit.transform.gameObject, justClicked, mouseDown);   // sidenote : apparently hit.collider.transform.gameObject is different - see https://forum.unity.com/threads/raycast-on-child-gives-parent-name-in-hit-transform-name.57172/ 
+            if (hit.transform.gameObject == backgroundObj){
+                MouseHitNoGameObject(justClicked, mouseDown, hit.point);
+            } else {
+                MouseHitGameObject(hit.transform.gameObject, justClicked, mouseDown, hit.point);
+            }
         }
         else
         {
-            MouseHitNoGameObject(justClicked, mouseDown);
+            //MouseHitNoGameObject(justClicked, mouseDown);
+            Debug.Log("...");
         }
     }
 }

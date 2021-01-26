@@ -14,7 +14,7 @@ public class MeshScript : MonoBehaviour
         return newUVs;
     }
 
-    public void RedoMesh (GameObject obj, Vector3[] newVertices, int[] newTriangles) {
+    public void RedoMesh (GameObject obj, Vector3[] newVertices, int[] newTriangles, bool includeCollider = true) {
         Vector2[] newUVs = CalcNewUVs(newVertices);
         Mesh mesh = obj.GetComponent<MeshFilter>().mesh;
         mesh.Clear();
@@ -22,7 +22,9 @@ public class MeshScript : MonoBehaviour
         mesh.triangles = newTriangles;
         mesh.uv = newUVs;
         mesh.RecalculateNormals();
-        MeshCollider meshCollider = obj.AddComponent<MeshCollider>();
-        meshCollider.sharedMesh = mesh;
+        if (includeCollider) {
+            MeshCollider meshCollider = obj.AddComponent<MeshCollider>();
+            meshCollider.sharedMesh = mesh;
+        }
     }
 }

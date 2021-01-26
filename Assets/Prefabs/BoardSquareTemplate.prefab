@@ -110,3 +110,5 @@ MonoBehaviour:
   defaultMaterial: {fileID: 2100000, guid: c8df20a2695604b8a97ebe1fec440b55, type: 2}
   mouseOverMaterial: {fileID: 2100000, guid: 96b9a73cbc6f14ea4a8d7db92b0dbd74, type: 2}
   mouseClickMaterial: {fileID: 2100000, guid: 6d780bcbc57af4099950811e5bf9ceeb, type: 2}
+  mouseWillDropMaterial: {fileID: 2100000, guid: da2f55c437cb148a1aa816d87fe3796e,
+    type: 2}

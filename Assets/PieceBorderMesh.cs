@@ -28,6 +28,6 @@ public class PieceBorderMesh : MonoBehaviour
         Vector3[] newVertices = new Vector3[8];
         int[] newTriangles;
         newTriangles = CreateBorderMesh(newVertices);
-        scriptMaster.GetComponent<MeshScript>().RedoMesh(gameObject, newVertices, newTriangles);
+        scriptMaster.GetComponent<MeshScript>().RedoMesh(gameObject, newVertices, newTriangles, false);
     }
 }
