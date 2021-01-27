@@ -24,6 +24,10 @@ public class BoardScript : MonoBehaviour
     private Dictionary<string, GameObject[]> piecesDict;
     private GameObject tileToScale;
     private GameObject grabbedPiece;
+    private Vector3 grabbedOriginalPos;
+    private GameObject[,] board;
+    private int numRows;
+    private int numCols;
 
     bool ObjectIsTile (GameObject obj) {
         return obj.transform.parent == tileParent.transform;
@@ -51,6 +55,23 @@ public class BoardScript : MonoBehaviour
     void SetGrabbedPiece (GameObject obj) {
         obj.GetComponent<MeshCollider>().enabled = false;
         grabbedPiece = obj;
+        grabbedOriginalPos = obj.transform.position;
+    }
+
+    void ResetGrabbedPiece () {
+        grabbedPiece.GetComponent<MeshCollider>().enabled = true;
+        grabbedPiece.transform.position = grabbedOriginalPos;
+        grabbedPiece = null;
+    }
+
+    int[] GetTileLoc (GameObject obj) {
+        float boardWidth = gameObject.GetComponent<Renderer>().bounds.size[0];
+        float boardHeight = gameObject.GetComponent<Renderer>().bounds.size[1];
+        float tileWidth = boardWidth / numCols;
+        float tileHeight = boardHeight / numRows;
+        float x = obj.transform.position.x - (gameObject.transform.position.x - boardWidth / 2);
+        float y = obj.transform.position.y - (gameObject.transform.position.y - boardHeight / 2);
+        return new int[2] {(int) (x / tileWidth), (int) (y / tileHeight)};
     }
 
     void MouseHitGameObject (GameObject obj, bool justClicked, bool mouseDown, Vector3 point) {
@@ -62,7 +83,14 @@ public class BoardScript : MonoBehaviour
                     return;
                 }
             } else {
-                grabbedPiece = null;
+                if (ObjectIsTile(obj)) {
+                    int[] tileLoc = GetTileLoc(obj);
+                    board[tileLoc[1], tileLoc[0]] = grabbedPiece;
+                    grabbedPiece.transform.position = obj.transform.position;
+                    grabbedPiece = null;
+                } else {
+                    ResetGrabbedPiece();
+                }
                 HidePieceScreen();
             }
         } else {
@@ -106,7 +134,7 @@ public class BoardScript : MonoBehaviour
                 grabbedPiece.transform.position = point;
                 MoveScreenOverPiece(grabbedPiece);
             } else {
-                grabbedPiece = null;
+                ResetGrabbedPiece();
                 HidePieceScreen();
             }
         } else {
@@ -121,7 +149,7 @@ public class BoardScript : MonoBehaviour
         boardSquareTemplate.transform.localScale = new Vector3(boardSquareTemplate.transform.localScale.x * fracX, boardSquareTemplate.transform.localScale.y * fracY, boardSquareTemplate.transform.localScale.z);
     }
 
-    void InitBoardTiles (int numCols, int numRows) {
+    void InitBoardTiles () {
         float boardWidth = gameObject.GetComponent<Renderer>().bounds.size[0];
         float boardHeight = gameObject.GetComponent<Renderer>().bounds.size[1];
         float tileWidth = boardWidth / numCols;
@@ -141,6 +169,10 @@ public class BoardScript : MonoBehaviour
                 newTile.transform.parent = tileParent.transform;
             }
         }
+    }
+
+    void InitBoard () {
+        board = new GameObject[numRows, numCols];
     }
 
     void ShowPiecesOnSelector () {
@@ -203,7 +235,10 @@ public class BoardScript : MonoBehaviour
 
     void Start()
     {
-        InitBoardTiles(10, 10);
+        numRows = 10;
+        numCols = 10;
+        InitBoardTiles();
+        InitBoard();
         InitPieceSelector();
     }
 
@@ -224,7 +259,6 @@ public class BoardScript : MonoBehaviour
         else
         {
             //MouseHitNoGameObject(justClicked, mouseDown);
-            Debug.Log("...");
         }
     }
 }
