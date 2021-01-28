@@ -31,14 +31,16 @@ public class PiecesScript : MonoBehaviour
         return tex;
     }
 
-    public Dictionary<string, GameObject[]> InitPieceQuads (string team, GameObject piecesParent, GameObject tileToScale) {
+    public void InitPieceQuads (string team, GameObject piecesParent, GameObject tileToScale, Dictionary<string, GameObject[]> piecesDict, Dictionary<GameObject, string> pieceValues) {
         scriptMaster.GetComponent<ScaleScript>().ScaleGameObject(quadImgTemplate, tileToScale);
         string assetsDir = Application.dataPath;
         string piecesTeamsPath = assetsDir + "/Files/Images/Pieces/";
         string localDirPath = piecesTeamsPath + team + "/";
         Texture2D tex;
         GameObject newQuadImg;
-        Dictionary<string, GameObject[]> piecesDict = new Dictionary<string, GameObject[]>();
+        //Dictionary<string, GameObject[]> piecesDict = new Dictionary<string, GameObject[]>();
+        //piecesDict = new Dictionary<string, GameObject[]>();
+        //pieceValues = new Dictionary<GameObject, string>();
         foreach(KeyValuePair<string, int> item in pieceQuantities) {
             tex = CreateTexture(localDirPath + item.Key + ".png");
             piecesDict[item.Key] = new GameObject[item.Value];
@@ -47,8 +49,9 @@ public class PiecesScript : MonoBehaviour
                 newQuadImg.transform.parent = piecesParent.transform;
                 newQuadImg.GetComponent<Renderer>().material.mainTexture = tex;
                 piecesDict[item.Key][i] = newQuadImg;
+                pieceValues[newQuadImg] = item.Key;
             }
         }
-        return piecesDict;
+        //return piecesDict;
     }
 }
