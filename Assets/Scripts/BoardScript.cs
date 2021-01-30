@@ -30,6 +30,7 @@ public class BoardScript : MonoBehaviour
     private int numRows;
     private int numCols;
     private Dictionary<GameObject, string> pieceValues;
+    private bool pieceScrollDisabled = false;
 
     bool ObjectIsTile (GameObject obj) {
         return obj.transform.parent == tileParent.transform;
@@ -112,7 +113,7 @@ public class BoardScript : MonoBehaviour
                 HidePieceScreen();
             }
         }
-        if ((ObjectIsTile(obj)) || (obj == pieceMenuUpArrow) || (obj == pieceMenuDownArrow)) {
+        if (ObjectIsTile(obj)) {
             ResetHighlighted(obj);
             currentlyOver = obj;
             if (mouseDown) {
@@ -124,12 +125,20 @@ public class BoardScript : MonoBehaviour
             } else {
                 currentlyOver.GetComponent<Highlight2D>().MouseHover();
             }
-            if ((obj == pieceMenuUpArrow) && justClicked) {
-                PieceSelectorScroll(true);  // up/down..
-                ShowPiecesOnSelector();
-            } else if ((obj == pieceMenuDownArrow) && justClicked) {
-                PieceSelectorScroll(false);
-                ShowPiecesOnSelector();
+        }
+        if ((obj == pieceMenuUpArrow) || (obj == pieceMenuDownArrow)) {
+            ResetHighlighted(obj);
+            currentlyOver = obj;
+            if (!pieceScrollDisabled) { // maybe fine if just lights up.
+                if (mouseDown) {
+                    currentlyOver.GetComponent<Highlight2D>().MouseClicking();
+                } else {
+                    currentlyOver.GetComponent<Highlight2D>().MouseHover();
+                }
+                if (justClicked) {
+                    PieceSelectorScroll(obj == pieceMenuUpArrow);  // up/down..
+                    ShowPiecesOnSelector();
+                }
             }
         }
     }
@@ -191,14 +200,16 @@ public class BoardScript : MonoBehaviour
         float marginBtwnPieces = (rectDims.y - 4 * pieceHeight) / 5;
         int idx;
         for (int i = 0; i < show.Length; i++) {
-            newPos = new Vector3(pieceMenuRect.transform.position.x, pieceMenuRect.transform.position.y + rectDims.y / 2 - marginBtwnPieces - pieceHeight / 2 - i * (pieceHeight + marginBtwnPieces), -0.002f);
-            if (!goodPiecesOnBoard.ContainsKey(show[i])) {
-                idx = 0;
-            } else {
-                idx = goodPiecesOnBoard[show[i]];
+            if (show[i] != null) {
+                newPos = new Vector3(pieceMenuRect.transform.position.x, pieceMenuRect.transform.position.y + rectDims.y / 2 - marginBtwnPieces - pieceHeight / 2 - i * (pieceHeight + marginBtwnPieces), -0.002f);
+                if (!goodPiecesOnBoard.ContainsKey(show[i])) {
+                    idx = 0;
+                } else {
+                    idx = goodPiecesOnBoard[show[i]];
+                }
+                piecesDict[show[i]][idx].transform.position = newPos;
+                piecesDict[show[i]][idx].SetActive(true);
             }
-            piecesDict[show[i]][idx].transform.position = newPos;
-            piecesDict[show[i]][idx].SetActive(true);
         }
     }
 
@@ -222,11 +233,11 @@ public class BoardScript : MonoBehaviour
         for (int i = 0; i < lenPieceOrder; i++) {
             piece = pieceOrder[(pieceOrderIdx + i) % lenPieceOrder];
             if ((!goodPiecesOnBoard.ContainsKey(piece)) || (goodPiecesOnBoard[piece] < piecesDict[piece].Length)) {
-                res[got] = piece;
                 got++;
-                if (got == 4) {
+                if (got == 5) {
                     break;
                 }
+                res[got - 1] = piece;
             } else if (i == 0) {
                 needToResetIdx = true;
             }
@@ -234,13 +245,18 @@ public class BoardScript : MonoBehaviour
         if (needToResetIdx) {
             FindNextPieceOrderIdx(true);
         }
+        pieceScrollDisabled = got <= 4;
         return res;
     }
 
     void FindNextPieceOrderIdx (bool isDown) {
         string piece;
         int sign = isDown ? 1 : -1;
-        while (true) {
+        int originalIdx = -1;
+        while (pieceOrderIdx != originalIdx) {
+            if (originalIdx == -1) {
+                originalIdx = pieceOrderIdx;
+            }
             pieceOrderIdx += sign;
             pieceOrderIdx = Mod(pieceOrderIdx, pieceOrder.Length);
             piece = pieceOrder[pieceOrderIdx];
@@ -259,7 +275,13 @@ public class BoardScript : MonoBehaviour
             pieceToRemove = shown[3];
         }
         FindNextPieceOrderIdx(isDown);
-        piecesDict[pieceToRemove][0].SetActive(false);
+        int idx;
+        if (!goodPiecesOnBoard.ContainsKey(pieceToRemove)) {
+            idx = 0;
+        } else {
+            idx = goodPiecesOnBoard[pieceToRemove];
+        }
+        piecesDict[pieceToRemove][idx].SetActive(false);
         pieceOrderIdx = Mod(pieceOrderIdx, pieceOrder.Length);
     }
 
