@@ -15,6 +15,7 @@ public class BoardScript : MonoBehaviour
     public GameObject scriptMaster;
     public GameObject pieceHighlightScreen;
     public GameObject backgroundObj;
+    public GameObject boardPiecesParent;
 
     private GameObject currentlyOver;
     private GameObject currentPiece;
@@ -26,6 +27,7 @@ public class BoardScript : MonoBehaviour
     private GameObject grabbedPiece;
     private string grabbedPieceName;
     private Vector3 grabbedOriginalPos;
+    private bool grabbedOriginalPosBool = true;
     private GameObject[,] board;
     private int numRows;
     private int numCols;
@@ -58,12 +60,17 @@ public class BoardScript : MonoBehaviour
     void SetGrabbedPiece (GameObject obj) {
         obj.GetComponent<MeshCollider>().enabled = false;
         grabbedPiece = obj;
+        grabbedOriginalPosBool = true;
         grabbedOriginalPos = obj.transform.position;
     }
 
     void ResetGrabbedPiece () {
         grabbedPiece.GetComponent<MeshCollider>().enabled = true;
-        grabbedPiece.transform.position = grabbedOriginalPos;
+        if (grabbedOriginalPosBool) {
+            grabbedPiece.transform.position = grabbedOriginalPos;
+        } else {
+            grabbedPiece.SetActive(false);
+        }
         grabbedPiece = null;
     }
 
@@ -78,6 +85,7 @@ public class BoardScript : MonoBehaviour
     }
 
     void MouseHitGameObject (GameObject obj, bool justClicked, bool mouseDown, Vector3 point) {
+        int[] tileLoc;
         if (grabbedPiece) {
             if (mouseDown) {
                 grabbedPiece.transform.position = point;
@@ -86,21 +94,29 @@ public class BoardScript : MonoBehaviour
                     return;
                 }
             } else {
+                // releasing a grabbed tile.
                 if (ObjectIsTile(obj)) {
-                    int[] tileLoc = GetTileLoc(obj);
-                    board[tileLoc[1], tileLoc[0]] = grabbedPiece;
-                    grabbedPiece.transform.position = obj.transform.position;
-                    string pieceVal = pieceValues[grabbedPiece];
-                    if (goodPiecesOnBoard.ContainsKey(pieceVal)) {
-                        goodPiecesOnBoard[pieceVal]++;
+                    tileLoc = GetTileLoc(obj);
+                    if (board[tileLoc[1], tileLoc[0]]) {
+                        ResetGrabbedPiece();
                     } else {
-                        goodPiecesOnBoard[pieceVal] = 1;
+                        // dropping piece on empty tile.
+                        board[tileLoc[1], tileLoc[0]] = grabbedPiece;
+                        grabbedPiece.transform.parent = boardPiecesParent.transform;
+                        grabbedPiece.transform.position = obj.transform.position;
+                        string pieceVal = pieceValues[grabbedPiece];
+                        if (goodPiecesOnBoard.ContainsKey(pieceVal)) {
+                            goodPiecesOnBoard[pieceVal]++;
+                        } else {
+                            goodPiecesOnBoard[pieceVal] = 1;
+                        }
+                        grabbedPiece = null;
+                        grabbedOriginalPosBool = false;
                     }
-                    grabbedPiece = null;
-                    ShowPiecesOnSelector();
                 } else {
                     ResetGrabbedPiece();
                 }
+                ShowPiecesOnSelector();
                 HidePieceScreen();
             }
         } else {
@@ -117,13 +133,27 @@ public class BoardScript : MonoBehaviour
             ResetHighlighted(obj);
             currentlyOver = obj;
             if (mouseDown) {
+                tileLoc = GetTileLoc(obj);
                 if (grabbedPiece) {
-                    currentlyOver.GetComponent<Highlight2D>().MouseWillDrop();
+                    if (board[tileLoc[1], tileLoc[0]]) {
+                        obj.GetComponent<Highlight2D>().MouseClicking();
+                    } else {
+                        obj.GetComponent<Highlight2D>().MouseWillDrop();
+                    }
                 } else {
-                    currentlyOver.GetComponent<Highlight2D>().MouseClicking();
+                    if (board[tileLoc[1], tileLoc[0]]) {
+                        // grabbing piece off board.
+                        grabbedPiece = board[tileLoc[1], tileLoc[0]];
+                        board[tileLoc[1], tileLoc[0]] = null;
+                        goodPiecesOnBoard[pieceValues[grabbedPiece]]--;
+                        grabbedPiece.transform.parent = goodPiecesParent.transform;
+                        //cont.?
+                    } else {
+                        obj.GetComponent<Highlight2D>().MouseClicking();
+                    }
                 }
             } else {
-                currentlyOver.GetComponent<Highlight2D>().MouseHover();
+                obj.GetComponent<Highlight2D>().MouseHover();
             }
         }
         if ((obj == pieceMenuUpArrow) || (obj == pieceMenuDownArrow)) {
@@ -152,6 +182,7 @@ public class BoardScript : MonoBehaviour
                 MoveScreenOverPiece(grabbedPiece);
             } else {
                 ResetGrabbedPiece();
+                ShowPiecesOnSelector();
                 HidePieceScreen();
             }
         } else {
@@ -192,7 +223,14 @@ public class BoardScript : MonoBehaviour
         board = new GameObject[numRows, numCols];
     }
 
+    void HideSelectorPieces () {
+        foreach (Transform t in goodPiecesParent.transform) {
+            t.gameObject.SetActive(false);
+        }
+    }
+
     void ShowPiecesOnSelector () {
+        HideSelectorPieces();
         string[] show = GetPiecesShownOnSelector();
         Vector3 newPos;
         Vector3 rectDims = pieceMenuRect.GetComponent<Renderer>().bounds.size;
@@ -202,10 +240,16 @@ public class BoardScript : MonoBehaviour
         for (int i = 0; i < show.Length; i++) {
             if (show[i] != null) {
                 newPos = new Vector3(pieceMenuRect.transform.position.x, pieceMenuRect.transform.position.y + rectDims.y / 2 - marginBtwnPieces - pieceHeight / 2 - i * (pieceHeight + marginBtwnPieces), -0.002f);
+                idx = 0;
                 if (!goodPiecesOnBoard.ContainsKey(show[i])) {
-                    idx = 0;
                 } else {
-                    idx = goodPiecesOnBoard[show[i]];
+                    //idx = goodPiecesOnBoard[show[i]];
+                    while (true) {  // ;(
+                        if (piecesDict[show[i]][idx].transform.parent == goodPiecesParent.transform) {
+                            break;
+                        }
+                        idx++;
+                    }
                 }
                 piecesDict[show[i]][idx].transform.position = newPos;
                 piecesDict[show[i]][idx].SetActive(true);
