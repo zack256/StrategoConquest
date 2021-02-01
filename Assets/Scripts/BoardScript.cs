@@ -16,6 +16,8 @@ public class BoardScript : MonoBehaviour
     public GameObject pieceHighlightScreen;
     public GameObject backgroundObj;
     public GameObject boardPiecesParent;
+    public GameObject confirmPiecesBtn;
+    public GameObject resetPiecesBtn;
 
     private GameObject currentlyOver;
     private GameObject currentPiece;
@@ -42,8 +44,9 @@ public class BoardScript : MonoBehaviour
         return obj.transform.parent == goodPiecesParent.transform;
     }
 
-    void MoveScreenOverPiece (GameObject piece) {
+    void MoveScreenOverPiece (GameObject piece, bool showBorder = true) {
         pieceHighlightScreen.transform.position = new Vector3(piece.transform.position.x, piece.transform.position.y, pieceHighlightScreen.transform.position.z);
+        pieceHighlightScreen.transform.GetChild(1).gameObject.SetActive(showBorder);   // 2nd child is border.
         pieceHighlightScreen.SetActive(true);
     }
 
@@ -84,7 +87,49 @@ public class BoardScript : MonoBehaviour
         return new int[2] {(int) (x / tileWidth), (int) (y / tileHeight)};
     }
 
+    void ResetPiecesToSelector () {
+        GameObject piece;
+        for (int i = 0; i < board.GetLength(0); i++) {
+            for (int j = 0; j < board.GetLength(1); j++) {
+                if (board[i, j]) {
+                    piece = board[i, j];
+                    goodPiecesOnBoard[pieceValues[piece]]--;
+                    piece.transform.parent = goodPiecesParent.transform;
+                    piece.GetComponent<MeshCollider>().enabled = true;
+                    board[i, j] = null;
+                }
+            } 
+        }
+        ShowPiecesOnSelector();
+    }
+
     void MouseHitGameObject (GameObject obj, bool justClicked, bool mouseDown, Vector3 point) {
+        if ((!grabbedPiece) && (obj.transform.parent == confirmPiecesBtn.transform)) {
+            MoveScreenOverPiece(obj, false);
+            if (mouseDown) {
+                if (justClicked) {
+                    Debug.Log("hello :)");
+                }
+                confirmPiecesBtn.GetComponent<ControlBtns>().Highlight();
+            } else {
+                confirmPiecesBtn.GetComponent<ControlBtns>().ResetHighlight();
+            }
+        } else {
+            confirmPiecesBtn.GetComponent<ControlBtns>().ResetHighlight();
+        }
+        if ((!grabbedPiece) && (obj.transform.parent == resetPiecesBtn.transform)) {
+            MoveScreenOverPiece(obj, false);
+            if (mouseDown) {
+                if (justClicked) {
+                    ResetPiecesToSelector();
+                }
+                resetPiecesBtn.GetComponent<ControlBtns>().Highlight();
+            } else {
+                resetPiecesBtn.GetComponent<ControlBtns>().ResetHighlight();
+            }
+        } else {
+            resetPiecesBtn.GetComponent<ControlBtns>().ResetHighlight();
+        }
         int[] tileLoc;
         if (grabbedPiece) {
             if (mouseDown) {
@@ -174,6 +219,8 @@ public class BoardScript : MonoBehaviour
     }
 
     void MouseHitNoGameObject (bool justClicked, bool mouseDown, Vector3 point) {
+        confirmPiecesBtn.GetComponent<ControlBtns>().ResetHighlight();
+        resetPiecesBtn.GetComponent<ControlBtns>().ResetHighlight();
         ResetHighlighted();
 
         if (grabbedPiece) {

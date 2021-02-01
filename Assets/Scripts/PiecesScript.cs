@@ -24,13 +24,6 @@ public class PiecesScript : MonoBehaviour
         {"F", 1},
     };
 
-    Texture2D CreateTexture (string filePath) {
-        byte[] imageData = File.ReadAllBytes(filePath);
-        Texture2D tex = new Texture2D(2, 2);
-        tex.LoadImage(imageData);
-        return tex;
-    }
-
     public void InitPieceQuads (string team, GameObject piecesParent, GameObject tileToScale, Dictionary<string, GameObject[]> piecesDict, Dictionary<GameObject, string> pieceValues) {
         scriptMaster.GetComponent<ScaleScript>().ScaleGameObject(quadImgTemplate, tileToScale);
         string assetsDir = Application.dataPath;
@@ -38,11 +31,8 @@ public class PiecesScript : MonoBehaviour
         string localDirPath = piecesTeamsPath + team + "/";
         Texture2D tex;
         GameObject newQuadImg;
-        //Dictionary<string, GameObject[]> piecesDict = new Dictionary<string, GameObject[]>();
-        //piecesDict = new Dictionary<string, GameObject[]>();
-        //pieceValues = new Dictionary<GameObject, string>();
         foreach(KeyValuePair<string, int> item in pieceQuantities) {
-            tex = CreateTexture(localDirPath + item.Key + ".png");
+            tex = scriptMaster.GetComponent<TextureScript>().CreateTexture(localDirPath + item.Key + ".png");
             piecesDict[item.Key] = new GameObject[item.Value];
             for (int i = 0; i < item.Value; i++) {
                 newQuadImg = Instantiate(quadImgTemplate, new Vector3(0, -20, 0), Quaternion.identity);
@@ -52,6 +42,5 @@ public class PiecesScript : MonoBehaviour
                 pieceValues[newQuadImg] = item.Key;
             }
         }
-        //return piecesDict;
     }
 }
