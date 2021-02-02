@@ -26,8 +26,8 @@ public class ControlBtns : MonoBehaviour
         newQuadImg.GetComponent<Renderer>().material.mainTexture = tex;
     }
 
-    public void Highlight () {
-        if (isCheck) {
+    public void Highlight (bool opposite = false) {
+        if (isCheck ^ opposite) {
             gameObject.GetComponent<Renderer>().material = checkMaterial;
         } else {
             gameObject.GetComponent<Renderer>().material = resetMaterial;

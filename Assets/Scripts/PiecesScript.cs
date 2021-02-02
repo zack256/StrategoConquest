@@ -9,7 +9,7 @@ public class PiecesScript : MonoBehaviour
     public GameObject quadImgTemplate;
     public GameObject scriptMaster;
 
-    private Dictionary<string, int> pieceQuantities = new Dictionary<string, int> {
+    public Dictionary<string, int> pieceQuantities = new Dictionary<string, int> {
         {"2", 8},
         {"3", 5},
         {"4", 4},
@@ -19,7 +19,7 @@ public class PiecesScript : MonoBehaviour
         {"8", 2},
         {"9", 1},
         {"10", 1},
-        {"B", 1},
+        {"B", 6},
         {"S", 1},
         {"F", 1},
     };

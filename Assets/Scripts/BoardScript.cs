@@ -30,7 +30,7 @@ public class BoardScript : MonoBehaviour
     private string grabbedPieceName;
     private Vector3 grabbedOriginalPos;
     private bool grabbedOriginalPosBool = true;
-    private GameObject[,] board;
+    public GameObject[,] board;
     private int numRows;
     private int numCols;
     private Dictionary<GameObject, string> pieceValues;
@@ -103,14 +103,19 @@ public class BoardScript : MonoBehaviour
         ShowPiecesOnSelector();
     }
 
+    bool IsValidLocForGood (int[] loc) {
+        return loc[1] < 4;  // bottom 4 rows
+    }
+
     void MouseHitGameObject (GameObject obj, bool justClicked, bool mouseDown, Vector3 point) {
         if ((!grabbedPiece) && (obj.transform.parent == confirmPiecesBtn.transform)) {
             MoveScreenOverPiece(obj, false);
             if (mouseDown) {
-                if (justClicked) {
+                bool canConfirm = goodPiecesParent.transform.childCount == 0;
+                confirmPiecesBtn.GetComponent<ControlBtns>().Highlight(!canConfirm);
+                if (justClicked && canConfirm) {
                     Debug.Log("hello :)");
                 }
-                confirmPiecesBtn.GetComponent<ControlBtns>().Highlight();
             } else {
                 confirmPiecesBtn.GetComponent<ControlBtns>().ResetHighlight();
             }
@@ -142,7 +147,7 @@ public class BoardScript : MonoBehaviour
                 // releasing a grabbed tile.
                 if (ObjectIsTile(obj)) {
                     tileLoc = GetTileLoc(obj);
-                    if (board[tileLoc[1], tileLoc[0]]) {
+                    if ((board[tileLoc[1], tileLoc[0]]) || (!IsValidLocForGood(tileLoc))) {
                         ResetGrabbedPiece();
                     } else {
                         // dropping piece on empty tile.
@@ -180,7 +185,7 @@ public class BoardScript : MonoBehaviour
             if (mouseDown) {
                 tileLoc = GetTileLoc(obj);
                 if (grabbedPiece) {
-                    if (board[tileLoc[1], tileLoc[0]]) {
+                    if ((board[tileLoc[1], tileLoc[0]]) || (!IsValidLocForGood(tileLoc))) {
                         obj.GetComponent<Highlight2D>().MouseClicking();
                     } else {
                         obj.GetComponent<Highlight2D>().MouseWillDrop();
