@@ -114,7 +114,8 @@ public class BoardScript : MonoBehaviour
                 bool canConfirm = goodPiecesParent.transform.childCount == 0;
                 confirmPiecesBtn.GetComponent<ControlBtns>().Highlight(!canConfirm);
                 if (justClicked && canConfirm) {
-                    Debug.Log("hello :)");
+                    string[,] enemyValues = scriptMaster.GetComponent<InitEnemy>().InitPieces();
+                    gameObject.GetComponent<PiecesScript>().InitEnemyPieces(boardPiecesParent, board, enemyValues, pieceValues, gameObject);
                 }
             } else {
                 confirmPiecesBtn.GetComponent<ControlBtns>().ResetHighlight();
