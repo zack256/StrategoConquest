@@ -37,6 +37,10 @@ public class BoardScript : MonoBehaviour
     private Dictionary<GameObject, string> pieceValues;
     private bool pieceScrollDisabled = false;
 
+    private Vector2 boardDims;
+    private Vector2 tileDims;
+    private Vector2 lowerLeft;
+
     bool ObjectIsTile (GameObject obj) {
         return obj.transform.parent == tileParent.transform;
     }
@@ -88,6 +92,10 @@ public class BoardScript : MonoBehaviour
         return new int[2] {(int) (x / tileWidth), (int) (y / tileHeight)};
     }
 
+    public Vector3 GetTilePos (int x, int y, float zPos = -0.0001f) {
+        return new Vector3(lowerLeft[0] + (x + 0.5f) * tileDims[0], lowerLeft[1] + (y + 0.5f) * tileDims[1], zPos);
+    }
+
     void ResetPiecesToSelector () {
         GameObject piece;
         for (int i = 0; i < board.GetLength(0); i++) {
@@ -117,20 +125,13 @@ public class BoardScript : MonoBehaviour
         }
         scriptMaster.GetComponent<Utils>().FisherYatesShuffle(remainingPieces);
         int z = 0;
-        // below save as func...
-        int numCols = 10, numRows = 10;
-        float boardWidth = gameObject.GetComponent<Renderer>().bounds.size[0];
-        float boardHeight = gameObject.GetComponent<Renderer>().bounds.size[1];
-        float tileWidth = boardWidth / numCols;
-        float tileHeight = boardHeight / numRows;
         string pieceVal;
-        Vector2 lowerLeft = new Vector2(gameObject.transform.position.x - boardWidth / 2, gameObject.transform.position.y - boardHeight / 2);
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 10; j++) {
                 if (!board[i, j]) {
                     remainingPieces[z].transform.parent = boardPiecesParent.transform;
                     board[i, j] = remainingPieces[z];
-                    remainingPieces[z].transform.position = new Vector3(lowerLeft[0] + (j + 0.5f) * tileWidth, lowerLeft[1] + (i + 0.5f) * tileHeight, -0.0001f);
+                    remainingPieces[z].transform.position = GetTilePos(j, i);
                     pieceVal = pieceValues[remainingPieces[z]];
                     if (goodPiecesOnBoard.ContainsKey(pieceVal)) {
                         goodPiecesOnBoard[pieceVal]++;
@@ -293,30 +294,22 @@ public class BoardScript : MonoBehaviour
         }
     }
 
-    void ResizeTileTemplate (float tileWidth, float tileHeight) {
+    void ResizeTileTemplate () {
         Vector3 templateSize = boardSquareTemplate.GetComponent<Renderer>().bounds.size;
-        float fracX = 1 / (templateSize[0] / tileWidth);
-        float fracY = 1 / (templateSize[1] / tileHeight);
+        Debug.Log(templateSize.x + " , " + tileDims.x);
+        float fracX = 1 / (templateSize.x / tileDims.x);
+        float fracY = 1 / (templateSize.y / tileDims.y);
         boardSquareTemplate.transform.localScale = new Vector3(boardSquareTemplate.transform.localScale.x * fracX, boardSquareTemplate.transform.localScale.y * fracY, boardSquareTemplate.transform.localScale.z);
     }
 
     void InitBoardTiles () {
-        float boardWidth = gameObject.GetComponent<Renderer>().bounds.size[0];
-        float boardHeight = gameObject.GetComponent<Renderer>().bounds.size[1];
-        float tileWidth = boardWidth / numCols;
-        float tileHeight = boardHeight / numRows;
-        Vector2 lowerLeft = new Vector2(gameObject.transform.position.x - boardWidth / 2, gameObject.transform.position.y - boardHeight / 2);
-        float xPos, yPos;
-        float tileZ = -0.0001f;
 
-        ResizeTileTemplate(tileWidth, tileHeight);
+        ResizeTileTemplate();
 
         GameObject newTile;
         for (int i = 0; i < numRows; i++) {
-            yPos = lowerLeft[1] + (i + 0.5f) * tileHeight;
             for (int j = 0; j < numCols; j++) {
-                xPos = lowerLeft[0] + (j + 0.5f) * tileWidth;
-                newTile = Instantiate(boardSquareTemplate, new Vector3(xPos, yPos, tileZ), Quaternion.identity);
+                newTile = Instantiate(boardSquareTemplate, GetTilePos(j, i), Quaternion.identity);
                 newTile.transform.parent = tileParent.transform;
             }
         }
@@ -437,10 +430,21 @@ public class BoardScript : MonoBehaviour
         return r < 0 ? r + b : r;
     }
 
-    void Start()
-    {
+    void InitBoardVars () {
         numRows = 10;
         numCols = 10;
+        float boardWidth = gameObject.GetComponent<Renderer>().bounds.size[0];
+        float boardHeight = gameObject.GetComponent<Renderer>().bounds.size[1];
+        boardDims = new Vector2(boardWidth, boardHeight);
+        float tileWidth = boardWidth / numCols;
+        float tileHeight = boardHeight / numRows;
+        tileDims = new Vector2(tileWidth, tileHeight);
+        lowerLeft = new Vector2(gameObject.transform.position.x - boardWidth / 2, gameObject.transform.position.y - boardHeight / 2);
+    }
+
+    void Start()
+    {
+        InitBoardVars();
         InitBoardTiles();
         InitBoard();
         InitPieceSelector();

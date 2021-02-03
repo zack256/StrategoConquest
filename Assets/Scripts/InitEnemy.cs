@@ -9,21 +9,6 @@ public class InitEnemy : MonoBehaviour
     public GameObject boardObj;
     public GameObject scriptMaster;
 
-    /**
-    void FisherYatesShuffle2 (string[] arr) {
-        System.Random rand = new System.Random();
-        int r;
-        string temp;
-        int n = arr.Length;
-        for (int i = 0; i < n - 1; i++) {
-            r = rand.Next(i, n);
-            temp = arr[r];
-            arr[r] = arr[i];
-            arr[i] = temp;
-        }
-    }
-    **/
-
     string[,] RandomSetup () {
         int numCols = 10;
         int teamStartRows = 4;
@@ -37,7 +22,6 @@ public class InitEnemy : MonoBehaviour
             }
         }
         scriptMaster.GetComponent<Utils>().FisherYatesShuffle(arr);
-        //FisherYatesShuffle(arr);
         string[,] valueList = new string[teamStartRows, numCols];
         z = 0;
         for (int i = 0; i < teamStartRows; i++) {

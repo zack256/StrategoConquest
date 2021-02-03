@@ -49,22 +49,13 @@ public class PiecesScript : MonoBehaviour
         Texture2D tex = scriptMaster.GetComponent<TextureScript>().CreateTexture(backImgPath);
         GameObject newQuadImg;
         int x, y;
-
-        int numCols = 10, numRows = 10;
-        float boardWidth = boardObj.GetComponent<Renderer>().bounds.size[0];
-        float boardHeight = boardObj.GetComponent<Renderer>().bounds.size[1];
-        float tileWidth = boardWidth / numCols;
-        float tileHeight = boardHeight / numRows;
-        Vector2 lowerLeft = new Vector2(boardObj.transform.position.x - boardWidth / 2, boardObj.transform.position.y - boardHeight / 2);
-        float xPos, yPos;
+        int numRows = 10, numCols = 10;
 
         for (int i = 0; i < enemyValues.GetLength(0); i++) {
             y = numRows - i - 1;   // algo places as if in human pos
-            yPos = lowerLeft[1] + (y + 0.5f) * tileHeight;
             for (int j = 0; j < enemyValues.GetLength(1); j++) {
                 x = numCols - j - 1;
-                xPos = lowerLeft[0] + (x + 0.5f) * tileWidth ;
-                newQuadImg = Instantiate(quadImgTemplate, new Vector3(xPos, yPos, -0.0003f), Quaternion.identity);
+                newQuadImg = Instantiate(quadImgTemplate, boardObj.GetComponent<BoardScript>().GetTilePos(x, y), Quaternion.identity);
                 newQuadImg.transform.parent = piecesParent.transform;
                 newQuadImg.GetComponent<Renderer>().material.mainTexture = tex;
                 pieceValues[newQuadImg] = enemyValues[i, j];
