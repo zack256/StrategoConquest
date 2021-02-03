@@ -5,21 +5,17 @@ using UnityEngine;
 public class ControlBtns : MonoBehaviour
 {
 
-    public bool isCheck;
+    public string btnName;
     public GameObject quadImgTemplate;
     public GameObject scriptMaster;
     public Material checkMaterial;
     public Material resetMaterial;
 
     private Material defaultMaterial;
+    private bool notReset;
 
     void InitImages () {
-        string path = Application.dataPath + "/Files/Images/Control/";
-        if (isCheck) {
-            path += "check.png";
-        } else {
-            path += "close.png";
-        }
+        string path = Application.dataPath + "/Files/Images/Control/" + btnName + ".png";
         Texture2D tex = scriptMaster.GetComponent<TextureScript>().CreateTexture(path);
         GameObject newQuadImg = Instantiate(quadImgTemplate, gameObject.transform.position, Quaternion.identity);
         newQuadImg.transform.parent = gameObject.transform;
@@ -27,7 +23,7 @@ public class ControlBtns : MonoBehaviour
     }
 
     public void Highlight (bool opposite = false) {
-        if (isCheck ^ opposite) {
+        if (notReset ^ opposite) {
             gameObject.GetComponent<Renderer>().material = checkMaterial;
         } else {
             gameObject.GetComponent<Renderer>().material = resetMaterial;
@@ -41,13 +37,8 @@ public class ControlBtns : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        notReset = btnName != "close";
         defaultMaterial = gameObject.GetComponent<Renderer>().material;
         InitImages();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }

@@ -18,6 +18,7 @@ public class BoardScript : MonoBehaviour
     public GameObject boardPiecesParent;
     public GameObject confirmPiecesBtn;
     public GameObject resetPiecesBtn;
+    public GameObject randomPiecesBtn;
 
     private GameObject currentlyOver;
     private GameObject currentPiece;
@@ -107,6 +108,42 @@ public class BoardScript : MonoBehaviour
         return loc[1] < 4;  // bottom 4 rows
     }
 
+    void RandomizeGoodPieces () {
+        // Randomizes the remaining pieces to the remaining squares.
+        int numRemaining = goodPiecesParent.transform.childCount;
+        GameObject[] remainingPieces = new GameObject[numRemaining];
+        for (int i = 0; i < numRemaining; i++) {
+            remainingPieces[i] = goodPiecesParent.transform.GetChild(i).gameObject;
+        }
+        scriptMaster.GetComponent<Utils>().FisherYatesShuffle(remainingPieces);
+        int z = 0;
+        // below save as func...
+        int numCols = 10, numRows = 10;
+        float boardWidth = gameObject.GetComponent<Renderer>().bounds.size[0];
+        float boardHeight = gameObject.GetComponent<Renderer>().bounds.size[1];
+        float tileWidth = boardWidth / numCols;
+        float tileHeight = boardHeight / numRows;
+        string pieceVal;
+        Vector2 lowerLeft = new Vector2(gameObject.transform.position.x - boardWidth / 2, gameObject.transform.position.y - boardHeight / 2);
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 10; j++) {
+                if (!board[i, j]) {
+                    remainingPieces[z].transform.parent = boardPiecesParent.transform;
+                    board[i, j] = remainingPieces[z];
+                    remainingPieces[z].transform.position = new Vector3(lowerLeft[0] + (j + 0.5f) * tileWidth, lowerLeft[1] + (i + 0.5f) * tileHeight, -0.0001f);
+                    pieceVal = pieceValues[remainingPieces[z]];
+                    if (goodPiecesOnBoard.ContainsKey(pieceVal)) {
+                        goodPiecesOnBoard[pieceVal]++;
+                    } else {
+                        goodPiecesOnBoard[pieceVal] = 1;
+                    }
+                    remainingPieces[z].SetActive(true);
+                    z++;
+                }
+            }
+        }
+    }
+
     void MouseHitGameObject (GameObject obj, bool justClicked, bool mouseDown, Vector3 point) {
         if ((!grabbedPiece) && (obj.transform.parent == confirmPiecesBtn.transform)) {
             MoveScreenOverPiece(obj, false);
@@ -135,6 +172,19 @@ public class BoardScript : MonoBehaviour
             }
         } else {
             resetPiecesBtn.GetComponent<ControlBtns>().ResetHighlight();
+        }
+        if ((!grabbedPiece) && (obj.transform.parent == randomPiecesBtn.transform)) {
+            MoveScreenOverPiece(obj, false);
+            if (mouseDown) {
+                if (justClicked) {
+                    RandomizeGoodPieces();
+                }
+                randomPiecesBtn.GetComponent<ControlBtns>().Highlight();
+            } else {
+                randomPiecesBtn.GetComponent<ControlBtns>().ResetHighlight();
+            }
+        } else {
+            randomPiecesBtn.GetComponent<ControlBtns>().ResetHighlight();
         }
         int[] tileLoc;
         if (grabbedPiece) {

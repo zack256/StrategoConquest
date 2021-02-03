@@ -7,8 +7,10 @@ public class InitEnemy : MonoBehaviour
 {
 
     public GameObject boardObj;
+    public GameObject scriptMaster;
 
-    void FisherYatesShuffle (string[] arr) {
+    /**
+    void FisherYatesShuffle2 (string[] arr) {
         System.Random rand = new System.Random();
         int r;
         string temp;
@@ -20,6 +22,7 @@ public class InitEnemy : MonoBehaviour
             arr[i] = temp;
         }
     }
+    **/
 
     string[,] RandomSetup () {
         int numCols = 10;
@@ -33,7 +36,8 @@ public class InitEnemy : MonoBehaviour
                 z++;
             }
         }
-        FisherYatesShuffle(arr);
+        scriptMaster.GetComponent<Utils>().FisherYatesShuffle(arr);
+        //FisherYatesShuffle(arr);
         string[,] valueList = new string[teamStartRows, numCols];
         z = 0;
         for (int i = 0; i < teamStartRows; i++) {
