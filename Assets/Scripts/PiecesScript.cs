@@ -24,7 +24,7 @@ public class PiecesScript : MonoBehaviour
         {"F", 1},
     };
 
-    public void InitPieceQuads (string team, GameObject piecesParent, GameObject tileToScale, Dictionary<string, GameObject[]> piecesDict, Dictionary<GameObject, string> pieceValues) {
+    public void InitPieceQuads (string team, GameObject piecesParent, GameObject tileToScale, Dictionary<string, GameObject[]> piecesDict, Dictionary<GameObject, Dictionary<string, string>> pieceData) {
         scriptMaster.GetComponent<ScaleScript>().ScaleGameObject(quadImgTemplate, tileToScale);
         string assetsDir = Application.dataPath;
         string piecesTeamsPath = assetsDir + "/Files/Images/Pieces/";
@@ -39,12 +39,14 @@ public class PiecesScript : MonoBehaviour
                 newQuadImg.transform.parent = piecesParent.transform;
                 newQuadImg.GetComponent<Renderer>().material.mainTexture = tex;
                 piecesDict[item.Key][i] = newQuadImg;
-                pieceValues[newQuadImg] = item.Key;
+                pieceData[newQuadImg] = new Dictionary<string, string>();
+                pieceData[newQuadImg]["value"] = item.Key;
+                pieceData[newQuadImg]["team"] = "0";
             }
         }
     }
 
-    public void InitEnemyPieces (GameObject piecesParent, GameObject[,] board, string[,] enemyValues, Dictionary<GameObject, string> pieceValues, GameObject boardObj) {
+    public void InitEnemyPieces (GameObject piecesParent, GameObject[,] board, string[,] enemyValues, Dictionary<GameObject, Dictionary<string, string>> pieceData, GameObject boardObj) {
         string backImgPath = Application.dataPath + "/Files/Images/Pieces/back.png";
         Texture2D tex = scriptMaster.GetComponent<TextureScript>().CreateTexture(backImgPath);
         GameObject newQuadImg;
@@ -58,7 +60,9 @@ public class PiecesScript : MonoBehaviour
                 newQuadImg = Instantiate(quadImgTemplate, boardObj.GetComponent<BoardScript>().GetTilePos(x, y), Quaternion.identity);
                 newQuadImg.transform.parent = piecesParent.transform;
                 newQuadImg.GetComponent<Renderer>().material.mainTexture = tex;
-                pieceValues[newQuadImg] = enemyValues[i, j];
+                pieceData[newQuadImg] = new Dictionary<string, string>();
+                pieceData[newQuadImg]["value"] = enemyValues[i, j];
+                pieceData[newQuadImg]["team"] = "1";
                 board[y, x] = newQuadImg;
             }
         }

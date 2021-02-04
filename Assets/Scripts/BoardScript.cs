@@ -34,8 +34,8 @@ public class BoardScript : MonoBehaviour
     public GameObject[,] board;
     private int numRows;
     private int numCols;
-    private Dictionary<GameObject, string> pieceValues;
     private bool pieceScrollDisabled = false;
+    private Dictionary<GameObject, Dictionary<string, string>> pieceData;
 
     private Vector2 boardDims;
     private Vector2 tileDims;
@@ -102,7 +102,7 @@ public class BoardScript : MonoBehaviour
             for (int j = 0; j < board.GetLength(1); j++) {
                 if (board[i, j]) {
                     piece = board[i, j];
-                    goodPiecesOnBoard[pieceValues[piece]]--;
+                    goodPiecesOnBoard[pieceData[piece]["value"]]--;
                     piece.transform.parent = goodPiecesParent.transform;
                     piece.GetComponent<MeshCollider>().enabled = true;
                     board[i, j] = null;
@@ -132,7 +132,7 @@ public class BoardScript : MonoBehaviour
                     remainingPieces[z].transform.parent = boardPiecesParent.transform;
                     board[i, j] = remainingPieces[z];
                     remainingPieces[z].transform.position = GetTilePos(j, i);
-                    pieceVal = pieceValues[remainingPieces[z]];
+                    pieceVal = pieceData[remainingPieces[z]]["value"];
                     if (goodPiecesOnBoard.ContainsKey(pieceVal)) {
                         goodPiecesOnBoard[pieceVal]++;
                     } else {
@@ -153,7 +153,7 @@ public class BoardScript : MonoBehaviour
                 confirmPiecesBtn.GetComponent<ControlBtns>().Highlight(!canConfirm);
                 if (justClicked && canConfirm) {
                     string[,] enemyValues = scriptMaster.GetComponent<InitEnemy>().InitPieces();
-                    gameObject.GetComponent<PiecesScript>().InitEnemyPieces(boardPiecesParent, board, enemyValues, pieceValues, gameObject);
+                    gameObject.GetComponent<PiecesScript>().InitEnemyPieces(boardPiecesParent, board, enemyValues, pieceData, gameObject);
                 }
             } else {
                 confirmPiecesBtn.GetComponent<ControlBtns>().ResetHighlight();
@@ -206,7 +206,7 @@ public class BoardScript : MonoBehaviour
                         board[tileLoc[1], tileLoc[0]] = grabbedPiece;
                         grabbedPiece.transform.parent = boardPiecesParent.transform;
                         grabbedPiece.transform.position = obj.transform.position;
-                        string pieceVal = pieceValues[grabbedPiece];
+                        string pieceVal = pieceData[grabbedPiece]["value"];
                         if (goodPiecesOnBoard.ContainsKey(pieceVal)) {
                             goodPiecesOnBoard[pieceVal]++;
                         } else {
@@ -247,7 +247,7 @@ public class BoardScript : MonoBehaviour
                         // grabbing piece off board.
                         grabbedPiece = board[tileLoc[1], tileLoc[0]];
                         board[tileLoc[1], tileLoc[0]] = null;
-                        goodPiecesOnBoard[pieceValues[grabbedPiece]]--;
+                        goodPiecesOnBoard[pieceData[grabbedPiece]["value"]]--;
                         grabbedPiece.transform.parent = goodPiecesParent.transform;
                         //cont.?
                     } else {
@@ -358,8 +358,8 @@ public class BoardScript : MonoBehaviour
         tileToScale = tileParent.transform.GetChild(0).gameObject;
         //piecesDict = gameObject.GetComponent<PiecesScript>().InitPieceQuads("Good", goodPiecesParent, tileToScale);
         piecesDict = new Dictionary<string, GameObject[]>();
-        pieceValues = new Dictionary<GameObject, string>();
-        gameObject.GetComponent<PiecesScript>().InitPieceQuads("Good", goodPiecesParent, tileToScale, piecesDict, pieceValues);
+        pieceData = new Dictionary<GameObject, Dictionary<string, string>>();
+        gameObject.GetComponent<PiecesScript>().InitPieceQuads("Good", goodPiecesParent, tileToScale, piecesDict, pieceData);
         goodPiecesOnBoard = new Dictionary<string, int>();
         ShowPiecesOnSelector();
     }
@@ -407,21 +407,8 @@ public class BoardScript : MonoBehaviour
     }
 
     void PieceSelectorScroll (bool isDown) {
-        string[] shown = GetPiecesShownOnSelector();
-        string pieceToRemove;
-        if (isDown) {
-            pieceToRemove = shown[0];
-        } else {
-            pieceToRemove = shown[3];
-        }
+        //string[] shown = GetPiecesShownOnSelector();
         FindNextPieceOrderIdx(isDown);
-        int idx;
-        if (!goodPiecesOnBoard.ContainsKey(pieceToRemove)) {
-            idx = 0;
-        } else {
-            idx = goodPiecesOnBoard[pieceToRemove];
-        }
-        piecesDict[pieceToRemove][idx].SetActive(false);
         pieceOrderIdx = Mod(pieceOrderIdx, pieceOrder.Length);
     }
 
