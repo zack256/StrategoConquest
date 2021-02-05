@@ -36,6 +36,7 @@ public class BoardScript : MonoBehaviour
     private int numCols;
     private bool pieceScrollDisabled = false;
     private Dictionary<GameObject, Dictionary<string, string>> pieceData;
+    private int playMode;
 
     private Vector2 boardDims;
     private Vector2 tileDims;
@@ -45,7 +46,7 @@ public class BoardScript : MonoBehaviour
         return obj.transform.parent == tileParent.transform;
     }
 
-    bool ObjectIsPiece (GameObject obj) {
+    bool ObjectIsGoodPieceOnSelector (GameObject obj) {
         return obj.transform.parent == goodPiecesParent.transform;
     }
 
@@ -116,6 +117,11 @@ public class BoardScript : MonoBehaviour
         return loc[1] < 4;  // bottom 4 rows
     }
 
+    void HideSetupObjs () {
+        pieceMenuRect.transform.parent.gameObject.SetActive(false);
+        confirmPiecesBtn.transform.parent.gameObject.SetActive(false);
+    }
+
     void RandomizeGoodPieces () {
         // Randomizes the remaining pieces to the remaining squares.
         int numRemaining = goodPiecesParent.transform.childCount;
@@ -152,6 +158,7 @@ public class BoardScript : MonoBehaviour
                 bool canConfirm = goodPiecesParent.transform.childCount == 0;
                 confirmPiecesBtn.GetComponent<ControlBtns>().Highlight(!canConfirm);
                 if (justClicked && canConfirm) {
+                    HideSetupObjs();
                     string[,] enemyValues = scriptMaster.GetComponent<InitEnemy>().InitPieces();
                     gameObject.GetComponent<PiecesScript>().InitEnemyPieces(boardPiecesParent, board, enemyValues, pieceData, gameObject);
                 }
@@ -179,6 +186,7 @@ public class BoardScript : MonoBehaviour
             if (mouseDown) {
                 if (justClicked) {
                     RandomizeGoodPieces();
+                    pieceScrollDisabled = true;
                 }
                 randomPiecesBtn.GetComponent<ControlBtns>().Highlight();
             } else {
@@ -222,7 +230,8 @@ public class BoardScript : MonoBehaviour
                 HidePieceScreen();
             }
         } else {
-            if (ObjectIsPiece(obj)) {
+            if (ObjectIsGoodPieceOnSelector(obj)) {
+                //Debug.Log(pieceData[obj]["team"]);
                 if (justClicked) {
                     SetGrabbedPiece(obj);
                 }
@@ -243,7 +252,7 @@ public class BoardScript : MonoBehaviour
                         obj.GetComponent<Highlight2D>().MouseWillDrop();
                     }
                 } else {
-                    if (board[tileLoc[1], tileLoc[0]]) {
+                    if ((board[tileLoc[1], tileLoc[0]]) && (pieceData[board[tileLoc[1], tileLoc[0]]]["team"] == "0")) {
                         // grabbing piece off board.
                         grabbedPiece = board[tileLoc[1], tileLoc[0]];
                         board[tileLoc[1], tileLoc[0]] = null;
@@ -339,7 +348,6 @@ public class BoardScript : MonoBehaviour
                 idx = 0;
                 if (!goodPiecesOnBoard.ContainsKey(show[i])) {
                 } else {
-                    //idx = goodPiecesOnBoard[show[i]];
                     while (true) {  // ;(
                         if (piecesDict[show[i]][idx].transform.parent == goodPiecesParent.transform) {
                             break;
@@ -356,7 +364,6 @@ public class BoardScript : MonoBehaviour
     void InitPieceSelector () {
         pieceOrderIdx = 0;
         tileToScale = tileParent.transform.GetChild(0).gameObject;
-        //piecesDict = gameObject.GetComponent<PiecesScript>().InitPieceQuads("Good", goodPiecesParent, tileToScale);
         piecesDict = new Dictionary<string, GameObject[]>();
         pieceData = new Dictionary<GameObject, Dictionary<string, string>>();
         gameObject.GetComponent<PiecesScript>().InitPieceQuads("Good", goodPiecesParent, tileToScale, piecesDict, pieceData);
@@ -407,7 +414,6 @@ public class BoardScript : MonoBehaviour
     }
 
     void PieceSelectorScroll (bool isDown) {
-        //string[] shown = GetPiecesShownOnSelector();
         FindNextPieceOrderIdx(isDown);
         pieceOrderIdx = Mod(pieceOrderIdx, pieceOrder.Length);
     }
@@ -431,6 +437,7 @@ public class BoardScript : MonoBehaviour
 
     void Start()
     {
+        playMode = 0;
         InitBoardVars();
         InitBoardTiles();
         InitBoard();
