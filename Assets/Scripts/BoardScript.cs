@@ -418,6 +418,14 @@ public class BoardScript : MonoBehaviour
         pieceOrderIdx = Mod(pieceOrderIdx, pieceOrder.Length);
     }
 
+    void TogglePieceLabels () {
+        foreach(KeyValuePair<GameObject, Dictionary<string, string>> item in pieceData) {
+            if (item.Value["team"] == "0") {
+                scriptMaster.GetComponent<ValueLabel>().ToggleLabel(item.Key);
+            }
+        }
+    }
+
     int Mod (int a, int b) {
         int r = a % b;
         return r < 0 ? r + b : r;
@@ -461,6 +469,9 @@ public class BoardScript : MonoBehaviour
         else
         {
             //MouseHitNoGameObject(justClicked, mouseDown);
+        }
+        if (Input.GetKeyUp(KeyCode.L)) {
+            TogglePieceLabels();
         }
     }
 }

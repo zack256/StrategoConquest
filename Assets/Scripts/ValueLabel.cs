@@ -27,4 +27,9 @@ public class ValueLabel : MonoBehaviour
     public void RemoveLabel (GameObject imgQuad) {
         GameObject.Destroy(imgQuad.transform.GetChild(0).gameObject);
     }
+
+    public void ToggleLabel (GameObject imgQuad) {
+        GameObject labelQuad = imgQuad.transform.GetChild(0).gameObject;
+        labelQuad.SetActive(!labelQuad.activeSelf);
+    }
 }
