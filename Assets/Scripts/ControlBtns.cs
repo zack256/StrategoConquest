@@ -18,6 +18,7 @@ public class ControlBtns : MonoBehaviour
         string path = Application.dataPath + "/Files/Images/Control/" + btnName + ".png";
         Texture2D tex = scriptMaster.GetComponent<TextureScript>().CreateTexture(path);
         GameObject newQuadImg = Instantiate(quadImgTemplate, gameObject.transform.position, Quaternion.identity);
+        scriptMaster.GetComponent<ValueLabel>().RemoveLabel(newQuadImg);
         newQuadImg.transform.parent = gameObject.transform;
         newQuadImg.GetComponent<Renderer>().material.mainTexture = tex;
     }

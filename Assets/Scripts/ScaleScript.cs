@@ -11,4 +11,8 @@ public class ScaleScript : MonoBehaviour
         float fracY = 1 / (objDims.y / referenceObjDims.y);
         objToScale.transform.localScale = new Vector3(objToScale.transform.localScale.x * fracX, objToScale.transform.localScale.y * fracY, objToScale.transform.localScale.z);
     }
+
+    public void ScaleByScalar (GameObject objToScale, float scalar) {
+        objToScale.transform.localScale *= scalar;
+    }
 }

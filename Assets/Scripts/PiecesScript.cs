@@ -36,6 +36,8 @@ public class PiecesScript : MonoBehaviour
             piecesDict[item.Key] = new GameObject[item.Value];
             for (int i = 0; i < item.Value; i++) {
                 newQuadImg = Instantiate(quadImgTemplate, new Vector3(0, -20, 0), Quaternion.identity);
+                scriptMaster.GetComponent<ValueLabel>().PositionLabel(newQuadImg);
+                scriptMaster.GetComponent<ValueLabel>().RenameLabel(newQuadImg, item.Key);
                 newQuadImg.transform.parent = piecesParent.transform;
                 newQuadImg.GetComponent<Renderer>().material.mainTexture = tex;
                 piecesDict[item.Key][i] = newQuadImg;
@@ -58,6 +60,7 @@ public class PiecesScript : MonoBehaviour
             for (int j = 0; j < enemyValues.GetLength(1); j++) {
                 x = numCols - j - 1;
                 newQuadImg = Instantiate(quadImgTemplate, boardObj.GetComponent<BoardScript>().GetTilePos(x, y), Quaternion.identity);
+                scriptMaster.GetComponent<ValueLabel>().RemoveLabel(newQuadImg);
                 newQuadImg.transform.parent = piecesParent.transform;
                 newQuadImg.GetComponent<Renderer>().material.mainTexture = tex;
                 pieceData[newQuadImg] = new Dictionary<string, string>();
