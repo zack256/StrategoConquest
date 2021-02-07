@@ -16,7 +16,7 @@ public class ValueLabel : MonoBehaviour
         Vector3 imgQuadSize = imgQuad.GetComponent<Renderer>().bounds.size;
         Vector3 imgQuadPos = imgQuad.transform.position;
         Vector3 labelQuadSize = labelQuad.GetComponent<Renderer>().bounds.size;
-        labelQuad.transform.position = new Vector3 (imgQuadPos.x - imgQuadSize.x / 2f + labelQuadSize.x / 2f, imgQuadPos.y + imgQuadSize.y / 2f - labelQuadSize.y / 2f, labelQuad.transform.position.z);
+        labelQuad.transform.position = new Vector3 (imgQuadPos.x - imgQuadSize.x / 2f + labelQuadSize.x / 2f, imgQuadPos.y + imgQuadSize.y / 2f - labelQuadSize.y / 2f, labelQuad.transform.position.z - 0.0001f);
     }
 
     public void RenameLabel (GameObject imgQuad, string newLabel) {

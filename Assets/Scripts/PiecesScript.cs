@@ -35,7 +35,7 @@ public class PiecesScript : MonoBehaviour
             tex = scriptMaster.GetComponent<TextureScript>().CreateTexture(localDirPath + item.Key + ".png");
             piecesDict[item.Key] = new GameObject[item.Value];
             for (int i = 0; i < item.Value; i++) {
-                newQuadImg = Instantiate(quadImgTemplate, new Vector3(0, -20, 0), Quaternion.identity);
+                newQuadImg = Instantiate(quadImgTemplate, new Vector3(0, -20, -0.003f), Quaternion.identity);
                 scriptMaster.GetComponent<ValueLabel>().PositionLabel(newQuadImg);
                 scriptMaster.GetComponent<ValueLabel>().RenameLabel(newQuadImg, item.Key);
                 newQuadImg.transform.parent = piecesParent.transform;

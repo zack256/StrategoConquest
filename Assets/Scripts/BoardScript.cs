@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class BoardScript : MonoBehaviour
 {
@@ -32,11 +33,13 @@ public class BoardScript : MonoBehaviour
     private Vector3 grabbedOriginalPos;
     private bool grabbedOriginalPosBool = true;
     public GameObject[,] board;
+    private GameObject[,] boardTiles;
     private int numRows;
     private int numCols;
     private bool pieceScrollDisabled = false;
     private Dictionary<GameObject, Dictionary<string, string>> pieceData;
     private int playMode;
+    private int[] lastPos = new int[] {-1, -1};
 
     private Vector2 boardDims;
     private Vector2 tileDims;
@@ -50,9 +53,10 @@ public class BoardScript : MonoBehaviour
         return obj.transform.parent == goodPiecesParent.transform;
     }
 
-    void MoveScreenOverPiece (GameObject piece, bool showBorder = true) {
+    void MoveScreenOverPiece (GameObject piece, bool showBorder = true, bool showScreen = true) {
         pieceHighlightScreen.transform.position = new Vector3(piece.transform.position.x, piece.transform.position.y, pieceHighlightScreen.transform.position.z);
         pieceHighlightScreen.transform.GetChild(1).gameObject.SetActive(showBorder);   // 2nd child is border.
+        pieceHighlightScreen.transform.GetChild(0).gameObject.SetActive(showScreen);    // 1st child is screen.
         pieceHighlightScreen.SetActive(true);
     }
 
@@ -151,9 +155,30 @@ public class BoardScript : MonoBehaviour
         }
     }
 
+    void ChangeLastPos (int[] newPos) {
+        lastPos = newPos;
+        HighlightLastPos();
+    }
+
+    void HighlightLastPos () {
+        if (IsLastPosLit()) {
+            boardTiles[lastPos[1], lastPos[0]].GetComponent<Highlight2D>().MarkLastPos();
+        }
+    }
+
+    bool IsLastPosLit () {
+        return lastPos[0] != -1;
+    }
+
+    void ResetLastPos () {
+        if (IsLastPosLit()) {
+            boardTiles[lastPos[1], lastPos[0]].GetComponent<Highlight2D>().ResetColor();
+        }
+        lastPos = new int[2] {-1, -1};
+    }
+
     void MouseHitGameObject (GameObject obj, bool justClicked, bool mouseDown, Vector3 point) {
         if ((!grabbedPiece) && (obj.transform.parent == confirmPiecesBtn.transform)) {
-            MoveScreenOverPiece(obj, false);
             if (mouseDown) {
                 bool canConfirm = goodPiecesParent.transform.childCount == 0;
                 confirmPiecesBtn.GetComponent<ControlBtns>().Highlight(!canConfirm);
@@ -161,6 +186,7 @@ public class BoardScript : MonoBehaviour
                     HideSetupObjs();
                     string[,] enemyValues = scriptMaster.GetComponent<InitEnemy>().InitPieces();
                     gameObject.GetComponent<PiecesScript>().InitEnemyPieces(boardPiecesParent, board, enemyValues, pieceData, gameObject);
+                    playMode = 1;
                 }
             } else {
                 confirmPiecesBtn.GetComponent<ControlBtns>().ResetHighlight();
@@ -169,7 +195,6 @@ public class BoardScript : MonoBehaviour
             confirmPiecesBtn.GetComponent<ControlBtns>().ResetHighlight();
         }
         if ((!grabbedPiece) && (obj.transform.parent == resetPiecesBtn.transform)) {
-            MoveScreenOverPiece(obj, false);
             if (mouseDown) {
                 if (justClicked) {
                     ResetPiecesToSelector();
@@ -182,7 +207,6 @@ public class BoardScript : MonoBehaviour
             resetPiecesBtn.GetComponent<ControlBtns>().ResetHighlight();
         }
         if ((!grabbedPiece) && (obj.transform.parent == randomPiecesBtn.transform)) {
-            MoveScreenOverPiece(obj, false);
             if (mouseDown) {
                 if (justClicked) {
                     RandomizeGoodPieces();
@@ -228,10 +252,10 @@ public class BoardScript : MonoBehaviour
                 }
                 ShowPiecesOnSelector();
                 HidePieceScreen();
+                ResetLastPos();
             }
         } else {
             if (ObjectIsGoodPieceOnSelector(obj)) {
-                //Debug.Log(pieceData[obj]["team"]);
                 if (justClicked) {
                     SetGrabbedPiece(obj);
                 }
@@ -243,13 +267,15 @@ public class BoardScript : MonoBehaviour
         if (ObjectIsTile(obj)) {
             ResetHighlighted(obj);
             currentlyOver = obj;
+            tileLoc = GetTileLoc(obj);
             if (mouseDown) {
-                tileLoc = GetTileLoc(obj);
                 if (grabbedPiece) {
-                    if ((board[tileLoc[1], tileLoc[0]]) || (!IsValidLocForGood(tileLoc))) {
+                    if ((board[tileLoc[1], tileLoc[0]]) || ((playMode == 0) && (!IsValidLocForGood(tileLoc)))) {
                         obj.GetComponent<Highlight2D>().MouseClicking();
                     } else {
-                        obj.GetComponent<Highlight2D>().MouseWillDrop();
+                        if (!((IsLastPosLit()) && (lastPos.SequenceEqual(tileLoc)))) {
+                            obj.GetComponent<Highlight2D>().MouseWillDrop();
+                        }
                     }
                 } else {
                     if ((board[tileLoc[1], tileLoc[0]]) && (pieceData[board[tileLoc[1], tileLoc[0]]]["team"] == "0")) {
@@ -258,12 +284,20 @@ public class BoardScript : MonoBehaviour
                         board[tileLoc[1], tileLoc[0]] = null;
                         goodPiecesOnBoard[pieceData[grabbedPiece]["value"]]--;
                         grabbedPiece.transform.parent = goodPiecesParent.transform;
-                        //cont.?
+                        MoveScreenOverPiece(grabbedPiece);  // unnecessary, will do next frame.
+                        if (playMode == 1) {
+                            ChangeLastPos(tileLoc);
+                        }
+                        ChangeLastPos(tileLoc);
                     } else {
                         obj.GetComponent<Highlight2D>().MouseClicking();
                     }
                 }
             } else {
+                // moving over tiles without clicking
+                if ((board[tileLoc[1], tileLoc[0]]) && (pieceData[board[tileLoc[1], tileLoc[0]]]["team"] == "0")) {
+                    //MoveScreenOverPiece(board[tileLoc[1], tileLoc[0]], showScreen: false);
+                }
                 obj.GetComponent<Highlight2D>().MouseHover();
             }
         }
@@ -282,6 +316,7 @@ public class BoardScript : MonoBehaviour
                 }
             }
         }
+        HighlightLastPos();
     }
 
     void MouseHitNoGameObject (bool justClicked, bool mouseDown, Vector3 point) {
@@ -297,15 +332,16 @@ public class BoardScript : MonoBehaviour
                 ResetGrabbedPiece();
                 ShowPiecesOnSelector();
                 HidePieceScreen();
+                ResetLastPos();
             }
         } else {
             HidePieceScreen();
         }
+        HighlightLastPos();
     }
 
     void ResizeTileTemplate () {
         Vector3 templateSize = boardSquareTemplate.GetComponent<Renderer>().bounds.size;
-        Debug.Log(templateSize.x + " , " + tileDims.x);
         float fracX = 1 / (templateSize.x / tileDims.x);
         float fracY = 1 / (templateSize.y / tileDims.y);
         boardSquareTemplate.transform.localScale = new Vector3(boardSquareTemplate.transform.localScale.x * fracX, boardSquareTemplate.transform.localScale.y * fracY, boardSquareTemplate.transform.localScale.z);
@@ -314,12 +350,14 @@ public class BoardScript : MonoBehaviour
     void InitBoardTiles () {
 
         ResizeTileTemplate();
+        boardTiles = new GameObject[numRows, numCols];
 
         GameObject newTile;
         for (int i = 0; i < numRows; i++) {
             for (int j = 0; j < numCols; j++) {
                 newTile = Instantiate(boardSquareTemplate, GetTilePos(j, i), Quaternion.identity);
                 newTile.transform.parent = tileParent.transform;
+                boardTiles[i, j] = newTile;
             }
         }
     }

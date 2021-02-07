@@ -8,6 +8,7 @@ public class Highlight2D : MonoBehaviour
     public Material mouseOverMaterial;
     public Material mouseClickMaterial;
     public Material mouseWillDropMaterial;
+    public Material lastPosMaterial;
 
     public void MouseHover () {
         ChangeColor(mouseOverMaterial);
@@ -19,6 +20,10 @@ public class Highlight2D : MonoBehaviour
 
     public void MouseWillDrop () {
         ChangeColor(mouseWillDropMaterial);
+    }
+
+    public void MarkLastPos () {
+        ChangeColor(lastPosMaterial);
     }
 
     public void ResetColor () {
