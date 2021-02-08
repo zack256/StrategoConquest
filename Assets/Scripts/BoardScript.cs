@@ -73,16 +73,24 @@ public class BoardScript : MonoBehaviour
     void SetGrabbedPiece (GameObject obj) {
         obj.GetComponent<MeshCollider>().enabled = false;
         grabbedPiece = obj;
-        grabbedOriginalPosBool = true;
-        grabbedOriginalPos = obj.transform.position;
+        if (playMode == 0) {
+            grabbedOriginalPosBool = true;
+            grabbedOriginalPos = obj.transform.position;
+        }
     }
 
     void ResetGrabbedPiece () {
-        grabbedPiece.GetComponent<MeshCollider>().enabled = true;
-        if (grabbedOriginalPosBool) {
-            grabbedPiece.transform.position = grabbedOriginalPos;
-        } else {
-            grabbedPiece.SetActive(false);
+        if (playMode == 0) {    // resetting to selector.
+            grabbedPiece.GetComponent<MeshCollider>().enabled = true;
+            if (grabbedOriginalPosBool) {
+                grabbedPiece.transform.position = grabbedOriginalPos;
+            } else {
+                grabbedPiece.SetActive(false);
+            }
+        } else if (playMode == 1) { // resetting to lastpos
+            GameObject lastTile = boardTiles[lastPos[1], lastPos[0]];
+            grabbedPiece.transform.position = lastTile.transform.position;
+            board[lastPos[1], lastPos[0]] = grabbedPiece; 
         }
         grabbedPiece = null;
     }
@@ -148,6 +156,7 @@ public class BoardScript : MonoBehaviour
                     } else {
                         goodPiecesOnBoard[pieceVal] = 1;
                     }
+                    remainingPieces[z].GetComponent<MeshCollider>().enabled = false;
                     remainingPieces[z].SetActive(true);
                     z++;
                 }
@@ -236,26 +245,31 @@ public class BoardScript : MonoBehaviour
                     } else {
                         // dropping piece on empty tile.
                         board[tileLoc[1], tileLoc[0]] = grabbedPiece;
-                        grabbedPiece.transform.parent = boardPiecesParent.transform;
                         grabbedPiece.transform.position = obj.transform.position;
-                        string pieceVal = pieceData[grabbedPiece]["value"];
-                        if (goodPiecesOnBoard.ContainsKey(pieceVal)) {
-                            goodPiecesOnBoard[pieceVal]++;
-                        } else {
-                            goodPiecesOnBoard[pieceVal] = 1;
+                        if (playMode == 0) {
+                            grabbedPiece.transform.parent = boardPiecesParent.transform;
+                            string pieceVal = pieceData[grabbedPiece]["value"];
+                            if (goodPiecesOnBoard.ContainsKey(pieceVal)) {
+                                goodPiecesOnBoard[pieceVal]++;
+                            } else {
+                                goodPiecesOnBoard[pieceVal] = 1;
+                            }
+                            grabbedOriginalPosBool = false;
                         }
                         grabbedPiece = null;
-                        grabbedOriginalPosBool = false;
                     }
                 } else {
                     ResetGrabbedPiece();
                 }
-                ShowPiecesOnSelector();
+                if (playMode == 0) {
+                    ShowPiecesOnSelector();
+                }
                 HidePieceScreen();
                 ResetLastPos();
             }
         } else {
             if (ObjectIsGoodPieceOnSelector(obj)) {
+                // grabbing piece off selector.
                 if (justClicked) {
                     SetGrabbedPiece(obj);
                 }
@@ -282,22 +296,24 @@ public class BoardScript : MonoBehaviour
                         // grabbing piece off board.
                         grabbedPiece = board[tileLoc[1], tileLoc[0]];
                         board[tileLoc[1], tileLoc[0]] = null;
-                        goodPiecesOnBoard[pieceData[grabbedPiece]["value"]]--;
-                        grabbedPiece.transform.parent = goodPiecesParent.transform;
+                        if (playMode == 0) {
+                            goodPiecesOnBoard[pieceData[grabbedPiece]["value"]]--;
+                            grabbedPiece.transform.parent = goodPiecesParent.transform;
+                        }
                         MoveScreenOverPiece(grabbedPiece);  // unnecessary, will do next frame.
                         if (playMode == 1) {
                             ChangeLastPos(tileLoc);
                         }
-                        ChangeLastPos(tileLoc);
+                        //ChangeLastPos(tileLoc);
                     } else {
                         obj.GetComponent<Highlight2D>().MouseClicking();
                     }
                 }
             } else {
                 // moving over tiles without clicking
-                if ((board[tileLoc[1], tileLoc[0]]) && (pieceData[board[tileLoc[1], tileLoc[0]]]["team"] == "0")) {
+                //if ((board[tileLoc[1], tileLoc[0]]) && (pieceData[board[tileLoc[1], tileLoc[0]]]["team"] == "0")) {
                     //MoveScreenOverPiece(board[tileLoc[1], tileLoc[0]], showScreen: false);
-                }
+                //}
                 obj.GetComponent<Highlight2D>().MouseHover();
             }
         }
@@ -330,7 +346,9 @@ public class BoardScript : MonoBehaviour
                 MoveScreenOverPiece(grabbedPiece);
             } else {
                 ResetGrabbedPiece();
-                ShowPiecesOnSelector();
+                if (playMode == 0) {
+                    ShowPiecesOnSelector();
+                }
                 HidePieceScreen();
                 ResetLastPos();
             }
