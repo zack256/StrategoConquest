@@ -185,6 +185,33 @@ public class BoardScript : MonoBehaviour
         }
         lastPos = new int[2] {-1, -1};
     }
+    
+    void MovePieceToTile (int[] newPos, GameObject newTile) {
+        //board[lastPos[1], lastPos[0]] = null;
+        board[newPos[1], newPos[0]] = grabbedPiece;
+        grabbedPiece.transform.position = newTile.transform.position;
+        //grabbedPiece = null;
+    }
+
+    void RemovePieceOffBoard (int[] pos) {
+        GameObject piece = board[pos[1], pos[0]];
+        board[pos[1], pos[0]] = null;
+        piece.SetActive(false);
+    }
+
+    void RemoveGrabbedPiece () {
+        grabbedPiece.SetActive(false);
+    }
+
+    bool CanGrabOffBoard (int[] pos) {
+        Dictionary<string, string> pieceInfo;
+        if (board[pos[1], pos[0]]) {
+            pieceInfo = pieceData[board[pos[1], pos[0]]];
+        } else {
+            return false;
+        }
+        return  (pieceInfo["team"] == "0") && (pieceInfo["value"] != "B") && (pieceInfo["value"] != "F");
+    }
 
     void MouseHitGameObject (GameObject obj, bool justClicked, bool mouseDown, Vector3 point) {
         if ((!grabbedPiece) && (obj.transform.parent == confirmPiecesBtn.transform)) {
@@ -243,26 +270,26 @@ public class BoardScript : MonoBehaviour
                     if (playMode == 1) {
                         if (board[tileLoc[1], tileLoc[0]]) {
                             int fightResult = scriptMaster.GetComponent<GameScript>().FightResult(board, pieceData, lastPos, tileLoc, grabbedPiece);
+                            Debug.Log(pieceData[board[tileLoc[1], tileLoc[0]]]["value"] + " " + fightResult);
                             if (fightResult == -1) {        // invalid
-                                //ResetGrabbedPiece();
+                                ResetGrabbedPiece();
                             } else if (fightResult == 0) {  // attacker win
-
+                                RemovePieceOffBoard(tileLoc);
+                                MovePieceToTile(tileLoc, obj);
                             } else if (fightResult == 1) {  // defender win
-
+                                RemoveGrabbedPiece();
                             } else {                        // tie
-
+                                RemovePieceOffBoard(tileLoc);
+                                RemoveGrabbedPiece();
                             }
-                            ResetGrabbedPiece();    // for now.
                         } else {    // dropping on empty tile.
                             if (scriptMaster.GetComponent<GameScript>().IsValidMove(board, pieceData, lastPos, tileLoc, grabbedPiece)) {
-                                board[lastPos[1], lastPos[0]] = null;
-                                board[tileLoc[1], tileLoc[0]] = grabbedPiece;
-                                grabbedPiece.transform.position = obj.transform.position;
-                                grabbedPiece = null;
+                                MovePieceToTile(tileLoc, obj);
                             } else {
                                 ResetGrabbedPiece();
                             }
                         }
+                        grabbedPiece = null;
                     } else {
                         // dropping on occupied tile.
                         if ((board[tileLoc[1], tileLoc[0]]) || (!IsValidLocForGood(tileLoc))) {
@@ -316,7 +343,7 @@ public class BoardScript : MonoBehaviour
                         }
                     }
                 } else {
-                    if ((board[tileLoc[1], tileLoc[0]]) && (pieceData[board[tileLoc[1], tileLoc[0]]]["team"] == "0")) {
+                    if (CanGrabOffBoard(tileLoc)) {
                         // grabbing piece off board.
                         grabbedPiece = board[tileLoc[1], tileLoc[0]];
                         board[tileLoc[1], tileLoc[0]] = null;

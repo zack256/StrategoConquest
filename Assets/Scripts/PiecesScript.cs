@@ -60,6 +60,7 @@ public class PiecesScript : MonoBehaviour
             for (int j = 0; j < enemyValues.GetLength(1); j++) {
                 x = numCols - j - 1;
                 newQuadImg = Instantiate(quadImgTemplate, boardObj.GetComponent<BoardScript>().GetTilePos(x, y), Quaternion.identity);
+                newQuadImg.GetComponent<MeshCollider>().enabled = false;
                 scriptMaster.GetComponent<ValueLabel>().RemoveLabel(newQuadImg);
                 newQuadImg.transform.parent = piecesParent.transform;
                 newQuadImg.GetComponent<Renderer>().material.mainTexture = tex;
