@@ -240,13 +240,37 @@ public class BoardScript : MonoBehaviour
                 // releasing a grabbed tile.
                 if (ObjectIsTile(obj)) {
                     tileLoc = GetTileLoc(obj);
-                    if ((board[tileLoc[1], tileLoc[0]]) || (!IsValidLocForGood(tileLoc))) {
-                        ResetGrabbedPiece();
+                    if (playMode == 1) {
+                        if (board[tileLoc[1], tileLoc[0]]) {
+                            int fightResult = scriptMaster.GetComponent<GameScript>().FightResult(board, pieceData, lastPos, tileLoc, grabbedPiece);
+                            if (fightResult == -1) {        // invalid
+                                //ResetGrabbedPiece();
+                            } else if (fightResult == 0) {  // attacker win
+
+                            } else if (fightResult == 1) {  // defender win
+
+                            } else {                        // tie
+
+                            }
+                            ResetGrabbedPiece();    // for now.
+                        } else {    // dropping on empty tile.
+                            if (scriptMaster.GetComponent<GameScript>().IsValidMove(board, pieceData, lastPos, tileLoc, grabbedPiece)) {
+                                board[lastPos[1], lastPos[0]] = null;
+                                board[tileLoc[1], tileLoc[0]] = grabbedPiece;
+                                grabbedPiece.transform.position = obj.transform.position;
+                                grabbedPiece = null;
+                            } else {
+                                ResetGrabbedPiece();
+                            }
+                        }
                     } else {
-                        // dropping piece on empty tile.
-                        board[tileLoc[1], tileLoc[0]] = grabbedPiece;
-                        grabbedPiece.transform.position = obj.transform.position;
-                        if (playMode == 0) {
+                        // dropping on occupied tile.
+                        if ((board[tileLoc[1], tileLoc[0]]) || (!IsValidLocForGood(tileLoc))) {
+                            ResetGrabbedPiece();
+                        } else {
+                            // dropping piece on empty tile.
+                            board[tileLoc[1], tileLoc[0]] = grabbedPiece;
+                            grabbedPiece.transform.position = obj.transform.position;
                             grabbedPiece.transform.parent = boardPiecesParent.transform;
                             string pieceVal = pieceData[grabbedPiece]["value"];
                             if (goodPiecesOnBoard.ContainsKey(pieceVal)) {
@@ -255,8 +279,8 @@ public class BoardScript : MonoBehaviour
                                 goodPiecesOnBoard[pieceVal] = 1;
                             }
                             grabbedOriginalPosBool = false;
+                            grabbedPiece = null;
                         }
-                        grabbedPiece = null;
                     }
                 } else {
                     ResetGrabbedPiece();
