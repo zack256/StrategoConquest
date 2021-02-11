@@ -28,8 +28,9 @@ public class ValueLabel : MonoBehaviour
         GameObject.Destroy(imgQuad.transform.GetChild(0).gameObject);
     }
 
-    public void ToggleLabel (GameObject imgQuad) {
-        GameObject labelQuad = imgQuad.transform.GetChild(0).gameObject;
+    public void ToggleLabel (PieceObj po) {
+        //GameObject labelQuad = imgQuad.transform.GetChild(0).gameObject;
+        GameObject labelQuad = po.GetLabel();
         labelQuad.SetActive(!labelQuad.activeSelf);
     }
 }

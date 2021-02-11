@@ -10,23 +10,27 @@ public class GameScript : MonoBehaviour
         return Math.Abs(pos1[0] - pos2[0]) + Math.Abs(pos1[1] - pos2[1]) == 1;
     }
 
-    public bool IsValidMove (GameObject[,] board, Dictionary<GameObject, Dictionary<string, string>> pieceData, int[] startPos, int[] destPos, GameObject mover) {
+    bool IsStraightLine (int[] pos1, int[] pos2) {  // hopover bug
+        return (pos1[0] == pos2[0]) ^ (pos1[1] == pos2[1]);
+    }
+
+    public bool IsValidMove (PieceObj[,] board, Dictionary<PieceObj, Dictionary<string, string>> pieceData, int[] startPos, int[] destPos, PieceObj mover) {
         // No fight, just move.
         if (startPos.SequenceEqual(destPos)) {
             return false;
         }
-        //return !board[destPos[1], destPos[0]];
+        if (pieceData[mover]["value"] == "2") {
+            return IsStraightLine(startPos, destPos);
+        }
         return IsAdjacent(startPos, destPos);
     }
 
-    public int FightResult (GameObject[,] board, Dictionary<GameObject, Dictionary<string, string>> pieceData, int[] startPos, int[] destPos, GameObject attacker) {
+    public int FightResult (PieceObj[,] board, Dictionary<PieceObj, Dictionary<string, string>> pieceData, int[] startPos, int[] destPos, PieceObj attacker) {
         // -1 : Invalid. 0 = Attacker captures. 1 = Defender captures. 2 = Both captured.
         if (!IsValidMove(board, pieceData, startPos, destPos, attacker)) {
             return -1;
         }
-        //GameObject attacker = board[startPos[1], startPos[0]];
-        GameObject defender = board[destPos[1], destPos[0]];
-        //Debug.Log(pieceData[attacker]);
+        PieceObj defender = board[destPos[1], destPos[0]];
         string attackerVal = pieceData[attacker]["value"];
         string defenderVal = pieceData[defender]["value"];
         if (pieceData[attacker]["team"] == pieceData[defender]["team"]) {

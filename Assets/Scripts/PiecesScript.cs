@@ -24,50 +24,62 @@ public class PiecesScript : MonoBehaviour
         {"F", 1},
     };
 
-    public void InitPieceQuads (string team, GameObject piecesParent, GameObject tileToScale, Dictionary<string, GameObject[]> piecesDict, Dictionary<GameObject, Dictionary<string, string>> pieceData) {
-        scriptMaster.GetComponent<ScaleScript>().ScaleGameObject(quadImgTemplate, tileToScale);
+    public void InitPieceQuads (string team, GameObject piecesParent, GameObject tileToScale, Dictionary<string, GameObject[]> piecesDict, Dictionary<PieceObj, Dictionary<string, string>> pieceData, Dictionary<GameObject, PieceObj> pOMap) {
+        scriptMaster.GetComponent<ScaleScript>().ScaleGameObject(quadImgTemplate.transform.GetChild(0).gameObject, tileToScale);
+        scriptMaster.GetComponent<ScaleScript>().ScaleGameObject(quadImgTemplate.transform.GetChild(1).gameObject, tileToScale);
         string assetsDir = Application.dataPath;
         string piecesTeamsPath = assetsDir + "/Files/Images/Pieces/";
         string localDirPath = piecesTeamsPath + team + "/";
         Texture2D tex;
         GameObject newQuadImg;
+        PieceObj po;
+        GameObject quadFront;
+        GameObject quadBack;
         foreach(KeyValuePair<string, int> item in pieceQuantities) {
             tex = scriptMaster.GetComponent<TextureScript>().CreateTexture(localDirPath + item.Key + ".png");
             piecesDict[item.Key] = new GameObject[item.Value];
             for (int i = 0; i < item.Value; i++) {
                 newQuadImg = Instantiate(quadImgTemplate, new Vector3(0, -20, -0.003f), Quaternion.identity);
-                scriptMaster.GetComponent<ValueLabel>().PositionLabel(newQuadImg);
-                scriptMaster.GetComponent<ValueLabel>().RenameLabel(newQuadImg, item.Key);
+                po = new PieceObj(newQuadImg);
+                quadFront = po.GetFront();
+                quadBack = po.GetBack();
+                scriptMaster.GetComponent<ValueLabel>().PositionLabel(quadFront);
+                scriptMaster.GetComponent<ValueLabel>().RenameLabel(quadFront, item.Key);
                 newQuadImg.transform.parent = piecesParent.transform;
-                newQuadImg.GetComponent<Renderer>().material.mainTexture = tex;
+                quadFront.GetComponent<Renderer>().material.mainTexture = tex;
                 piecesDict[item.Key][i] = newQuadImg;
-                pieceData[newQuadImg] = new Dictionary<string, string>();
-                pieceData[newQuadImg]["value"] = item.Key;
-                pieceData[newQuadImg]["team"] = "0";
+                pieceData[po] = new Dictionary<string, string>();
+                pieceData[po]["value"] = item.Key;
+                pieceData[po]["team"] = "0";
+                pOMap[po.GetMain()] = po;
             }
         }
     }
 
-    public void InitEnemyPieces (GameObject piecesParent, GameObject[,] board, string[,] enemyValues, Dictionary<GameObject, Dictionary<string, string>> pieceData, GameObject boardObj) {
+    public void InitEnemyPieces (GameObject piecesParent, PieceObj[,] board, string[,] enemyValues, Dictionary<PieceObj, Dictionary<string, string>> pieceData, GameObject boardObj) {
         string backImgPath = Application.dataPath + "/Files/Images/Pieces/back.png";
         Texture2D tex = scriptMaster.GetComponent<TextureScript>().CreateTexture(backImgPath);
         GameObject newQuadImg;
         int x, y;
         int numRows = 10, numCols = 10;
+        GameObject quadFront;
+        GameObject quadBack;
 
         for (int i = 0; i < enemyValues.GetLength(0); i++) {
             y = numRows - i - 1;   // algo places as if in human pos
             for (int j = 0; j < enemyValues.GetLength(1); j++) {
                 x = numCols - j - 1;
-                newQuadImg = Instantiate(quadImgTemplate, boardObj.GetComponent<BoardScript>().GetTilePos(x, y), Quaternion.identity);
-                newQuadImg.GetComponent<MeshCollider>().enabled = false;
-                scriptMaster.GetComponent<ValueLabel>().RemoveLabel(newQuadImg);
+                newQuadImg = Instantiate(quadImgTemplate, boardObj.GetComponent<BoardScript>().GetTilePos(x, y), Quaternion.Euler(0, 180, 0));
+                PieceObj po = new PieceObj(newQuadImg);
+                quadFront = po.GetFront();
+                quadBack = po.GetBack();
+                po.ToggleMeshCollider(false);
                 newQuadImg.transform.parent = piecesParent.transform;
-                newQuadImg.GetComponent<Renderer>().material.mainTexture = tex;
-                pieceData[newQuadImg] = new Dictionary<string, string>();
-                pieceData[newQuadImg]["value"] = enemyValues[i, j];
-                pieceData[newQuadImg]["team"] = "1";
-                board[y, x] = newQuadImg;
+                quadBack.GetComponent<Renderer>().material.mainTexture = tex;
+                pieceData[po] = new Dictionary<string, string>();
+                pieceData[po]["value"] = enemyValues[i, j];
+                pieceData[po]["team"] = "1";
+                board[y, x] = po;
             }
         }
     }
