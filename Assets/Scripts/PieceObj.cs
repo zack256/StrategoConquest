@@ -30,6 +30,14 @@ public class PieceObj
         obj.GetComponent<MeshCollider>().enabled = enable;
     }
 
+    public void MoveToPos (Vector3 newPos) {
+        obj.transform.position = newPos;
+    }
+
+    public void MoveToPos (GameObject destObj) {
+        MoveToPos(destObj.transform.position);
+    }
+
     public static implicit operator bool(PieceObj po) {
         return po != null;
     }

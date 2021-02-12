@@ -24,12 +24,16 @@ public class PiecesScript : MonoBehaviour
         {"F", 1},
     };
 
+    string GetTeamImagesPath (string team) {
+        string assetsDir = Application.dataPath;
+        string piecesTeamsPath = assetsDir + "/Files/Images/Pieces/";
+        return piecesTeamsPath + team + "/";
+    }
+
     public void InitPieceQuads (string team, GameObject piecesParent, GameObject tileToScale, Dictionary<string, GameObject[]> piecesDict, Dictionary<PieceObj, Dictionary<string, string>> pieceData, Dictionary<GameObject, PieceObj> pOMap) {
         scriptMaster.GetComponent<ScaleScript>().ScaleGameObject(quadImgTemplate.transform.GetChild(0).gameObject, tileToScale);
         scriptMaster.GetComponent<ScaleScript>().ScaleGameObject(quadImgTemplate.transform.GetChild(1).gameObject, tileToScale);
-        string assetsDir = Application.dataPath;
-        string piecesTeamsPath = assetsDir + "/Files/Images/Pieces/";
-        string localDirPath = piecesTeamsPath + team + "/";
+        string localDirPath = GetTeamImagesPath(team);
         Texture2D tex;
         GameObject newQuadImg;
         PieceObj po;
@@ -56,15 +60,17 @@ public class PiecesScript : MonoBehaviour
         }
     }
 
-    public void InitEnemyPieces (GameObject piecesParent, PieceObj[,] board, string[,] enemyValues, Dictionary<PieceObj, Dictionary<string, string>> pieceData, GameObject boardObj) {
+    public void InitEnemyPieces (GameObject piecesParent, PieceObj[,] board, string[,] enemyValues, Dictionary<PieceObj, Dictionary<string, string>> pieceData, GameObject boardObj, string team) {
         string backImgPath = Application.dataPath + "/Files/Images/Pieces/back.png";
-        Texture2D tex = scriptMaster.GetComponent<TextureScript>().CreateTexture(backImgPath);
+        string localDirPath = GetTeamImagesPath(team);
+        Texture2D backTex = scriptMaster.GetComponent<TextureScript>().CreateTexture(backImgPath);
+        Texture2D frontTex;
         GameObject newQuadImg;
         int x, y;
         int numRows = 10, numCols = 10;
         GameObject quadFront;
         GameObject quadBack;
-
+        string val;
         for (int i = 0; i < enemyValues.GetLength(0); i++) {
             y = numRows - i - 1;   // algo places as if in human pos
             for (int j = 0; j < enemyValues.GetLength(1); j++) {
@@ -73,11 +79,16 @@ public class PiecesScript : MonoBehaviour
                 PieceObj po = new PieceObj(newQuadImg);
                 quadFront = po.GetFront();
                 quadBack = po.GetBack();
+                val = enemyValues[i, j];
+                scriptMaster.GetComponent<ValueLabel>().PositionLabel(quadFront);
+                scriptMaster.GetComponent<ValueLabel>().RenameLabel(quadFront, val);
                 po.ToggleMeshCollider(false);
                 newQuadImg.transform.parent = piecesParent.transform;
-                quadBack.GetComponent<Renderer>().material.mainTexture = tex;
+                quadBack.GetComponent<Renderer>().material.mainTexture = backTex;
+                frontTex = scriptMaster.GetComponent<TextureScript>().CreateTexture(localDirPath + val + ".png");
+                quadFront.GetComponent<Renderer>().material.mainTexture = frontTex;
                 pieceData[po] = new Dictionary<string, string>();
-                pieceData[po]["value"] = enemyValues[i, j];
+                pieceData[po]["value"] = val;
                 pieceData[po]["team"] = "1";
                 board[y, x] = po;
             }

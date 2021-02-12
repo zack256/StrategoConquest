@@ -84,13 +84,13 @@ public class BoardScript : MonoBehaviour
         if (playMode == 0) {    // resetting to selector.
             grabbedPiece.ToggleMeshCollider(true);
             if (grabbedOriginalPosBool) {
-                grabbedPiece.GetMain().transform.position = grabbedOriginalPos;
+                grabbedPiece.MoveToPos(grabbedOriginalPos);
             } else {
                 grabbedPiece.GetMain().SetActive(false);
             }
         } else if (playMode == 1) { // resetting to lastpos
             GameObject lastTile = boardTiles[lastPos[1], lastPos[0]];
-            grabbedPiece.GetMain().transform.position = lastTile.transform.position;
+            grabbedPiece.MoveToPos(lastTile);
             board[lastPos[1], lastPos[0]] = grabbedPiece; 
         }
         grabbedPiece = null;
@@ -150,7 +150,7 @@ public class BoardScript : MonoBehaviour
                 if (!board[i, j]) {
                     remainingPieces[z].GetMain().transform.parent = boardPiecesParent.transform;
                     board[i, j] = remainingPieces[z];
-                    remainingPieces[z].GetMain().transform.position = GetTilePos(j, i);
+                    remainingPieces[z].MoveToPos(GetTilePos(j, i));
                     pieceVal = pieceData[remainingPieces[z]]["value"];
                     if (goodPiecesOnBoard.ContainsKey(pieceVal)) {
                         goodPiecesOnBoard[pieceVal]++;
@@ -190,7 +190,7 @@ public class BoardScript : MonoBehaviour
     void MovePieceToTile (int[] newPos, GameObject newTile) {
         //board[lastPos[1], lastPos[0]] = null;
         board[newPos[1], newPos[0]] = grabbedPiece;
-        grabbedPiece.GetMain().transform.position = newTile.transform.position;
+        grabbedPiece.MoveToPos(newTile);
         //grabbedPiece = null;
     }
 
@@ -211,7 +211,7 @@ public class BoardScript : MonoBehaviour
         } else {
             return false;
         }
-        return  (pieceInfo["team"] == "0") && (pieceInfo["value"] != "B") && (pieceInfo["value"] != "F");
+        return  (playMode == 0) || ((pieceInfo["team"] == "0") && (pieceInfo["value"] != "B") && (pieceInfo["value"] != "F"));
     }
 
     void MouseHitGameObject (GameObject obj, bool justClicked, bool mouseDown, Vector3 point) {
@@ -222,7 +222,7 @@ public class BoardScript : MonoBehaviour
                 if (justClicked && canConfirm) {
                     HideSetupObjs();
                     string[,] enemyValues = scriptMaster.GetComponent<InitEnemy>().InitPieces();
-                    gameObject.GetComponent<PiecesScript>().InitEnemyPieces(boardPiecesParent, board, enemyValues, pieceData, gameObject);
+                    gameObject.GetComponent<PiecesScript>().InitEnemyPieces(boardPiecesParent, board, enemyValues, pieceData, gameObject, "farm");
                     playMode = 1;
                 }
             } else {
@@ -259,7 +259,7 @@ public class BoardScript : MonoBehaviour
         int[] tileLoc;
         if (grabbedPiece) {
             if (mouseDown) {
-                grabbedPiece.GetMain().transform.position = point;
+                grabbedPiece.MoveToPos(point);
                 MoveScreenOverPiece(grabbedPiece.GetMain());
                 if (!ObjectIsTile(obj)) {
                     return;
@@ -297,7 +297,7 @@ public class BoardScript : MonoBehaviour
                         } else {
                             // dropping piece on empty tile.
                             board[tileLoc[1], tileLoc[0]] = grabbedPiece;
-                            grabbedPiece.GetMain().transform.position = obj.transform.position;
+                            grabbedPiece.MoveToPos(obj);
                             grabbedPiece.GetMain().transform.parent = boardPiecesParent.transform;
                             string pieceVal = pieceData[grabbedPiece]["value"];
                             if (goodPiecesOnBoard.ContainsKey(pieceVal)) {
@@ -393,7 +393,7 @@ public class BoardScript : MonoBehaviour
 
         if (grabbedPiece) {
             if (mouseDown) {
-                grabbedPiece.GetMain().transform.position = point;
+                grabbedPiece.MoveToPos(point);
                 MoveScreenOverPiece(grabbedPiece.GetMain());
             } else {
                 ResetGrabbedPiece();
