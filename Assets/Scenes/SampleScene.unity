@@ -624,6 +624,7 @@ MonoBehaviour:
   quadImgTemplate: {fileID: 7367520253785496901, guid: c2bd795c3807345bd902a29ee19bd548,
     type: 3}
   scriptMaster: {fileID: 32300312}
+  turnSpeed: 0.5
 --- !u!1 &472318670
 GameObject:
   m_ObjectHideFlags: 0

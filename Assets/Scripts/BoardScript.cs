@@ -41,7 +41,9 @@ public class BoardScript : MonoBehaviour
     private int playMode;
     private int[] lastPos = new int[] {-1, -1};
     private Dictionary<GameObject, PieceObj> pOMap;
-    private PieceObj currentlyTurning;
+    private int[] currentlyTurning = new int[] {-1, -1};
+    private int previousFightResult;
+    private int[] combatantLoc;
 
     private Vector2 boardDims;
     private Vector2 tileDims;
@@ -53,6 +55,13 @@ public class BoardScript : MonoBehaviour
 
     bool ObjectIsGoodPieceOnSelector (GameObject obj) {
         return obj.transform.parent == goodPiecesParent.transform;
+    }
+
+    PieceObj GetFromBoard (int[] loc) {
+        if (loc[0] == -1) {
+            return null;
+        }
+        return board[loc[1], loc[0]];
     }
 
     void MoveScreenOverPiece (GameObject piece, bool showBorder = true, bool showScreen = true) {
@@ -206,6 +215,9 @@ public class BoardScript : MonoBehaviour
     }
 
     bool CanGrabOffBoard (int[] pos) {
+        if (playMode == 3) {
+            return false;
+        }
         Dictionary<string, string> pieceInfo;
         if (board[pos[1], pos[0]]) {
             pieceInfo = pieceData[board[pos[1], pos[0]]];
@@ -215,9 +227,9 @@ public class BoardScript : MonoBehaviour
         return  (pieceInfo["team"] == "0") && ((playMode == 0) || ((pieceInfo["value"] != "B") && (pieceInfo["value"] != "F")));
     }
 
-    void StartTurning (PieceObj obj) {
-        currentlyTurning = obj;
-        currentlyTurning.StartTurning();
+    void StartTurning (int[] turnerLoc) {
+        currentlyTurning = turnerLoc;
+        GetFromBoard(currentlyTurning).StartTurning();
     }
 
     void MouseHitGameObject (GameObject obj, bool justClicked, bool mouseDown, Vector3 point) {
@@ -276,22 +288,23 @@ public class BoardScript : MonoBehaviour
                     tileLoc = GetTileLoc(obj);
                     if (playMode == 1) {
                         if (board[tileLoc[1], tileLoc[0]]) {
-                            int fightResult = scriptMaster.GetComponent<GameScript>().FightResult(board, pieceData, lastPos, tileLoc, grabbedPiece);
-                            if (fightResult == -1) {        // invalid
-                                ResetGrabbedPiece();
+                            int previousFightResult = scriptMaster.GetComponent<GameScript>().FightResult(board, pieceData, lastPos, tileLoc, grabbedPiece);
+                            ResetGrabbedPiece();
+                            if (previousFightResult == -1) {        // invalid
                             } else {
-                                //playMode = 3;   // fight animation
-                                ResetGrabbedPiece();
-                                StartTurning(board[tileLoc[1], tileLoc[0]]);
-                                if (fightResult == 0) {  // attacker win
+                                combatantLoc = tileLoc;
+                                playMode = 3;   // fight animation
+                                StartTurning(tileLoc);
+                                /**
+                                if (previousFightResult == 0) {  // attacker win
                                     //RemovePieceOffBoard(tileLoc);
                                     //MovePieceToTile(tileLoc, obj);
-                                } else if (fightResult == 1) {  // defender win
+                                } else if (previousFightResult == 1) {  // defender win
                                     //RemoveGrabbedPiece();
                                 } else {                        // tie
                                     //RemovePieceOffBoard(tileLoc);
                                     //RemoveGrabbedPiece();
-                                }
+                                }**/
                             }
                         } else {    // dropping on empty tile.
                             if (scriptMaster.GetComponent<GameScript>().IsValidMove(board, pieceData, lastPos, tileLoc, grabbedPiece)) {
@@ -578,14 +591,20 @@ public class BoardScript : MonoBehaviour
         RaycastHit hit;
         bool justClicked = Input.GetMouseButtonDown(0);
         bool mouseDown = Input.GetMouseButton(0);
-        if (currentlyTurning) {
-            if (!currentlyTurning.IsTurning()) {
-                currentlyTurning.StopTurning();
-                currentlyTurning = null;
+
+        PieceObj turnerObj = GetFromBoard(currentlyTurning);
+        if (turnerObj) {
+            if (!turnerObj.IsTurning()) {
+                turnerObj.StopTurning();
+                currentlyTurning = new int[] {-1, -1};
+                if (playMode == 3) {
+                    playMode = 1;   // for now
+                }
             } else {
-                currentlyTurning.UpdateTurn();
+                turnerObj.UpdateTurn();
             }
         }
+
         if (Physics.Raycast(ray, out hit))
         {
             if (hit.transform.gameObject == backgroundObj){

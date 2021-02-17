@@ -6,13 +6,17 @@ using UnityEngine;
 public class PieceObj
 {
     private GameObject obj;
-    private float turnSpeed;    // deg per sec
-    private int turnFramesLeft;
+    private float turnSpeed = 0.75f;    // deg per frame
+    private int turnFramesLeft = 0;
+    private bool facingForward = true;  // false means back is showing.
 
-    public PieceObj (GameObject obj, float turnSpeed) {
+    public PieceObj (GameObject obj) {
         this.obj = obj;
-        this.turnSpeed = turnSpeed;
-        this.turnFramesLeft = 0;
+    }
+
+    public PieceObj (GameObject obj, bool facingForward) {
+        this.obj = obj;
+        this.facingForward = facingForward;
     }
 
     public GameObject GetMain () {
@@ -62,9 +66,22 @@ public class PieceObj
         TemporaryVerticalShift(true);
     }
 
+    void FinishTurn () {
+        if (facingForward) {
+            obj.transform.rotation = Quaternion.Euler(0, 180, 0);
+        } else {
+            obj.transform.rotation = Quaternion.Euler(0, 0, 0);
+        }
+        facingForward = !facingForward;
+    }
+
     public void UpdateTurn () {
         this.turnFramesLeft--;
-        obj.transform.Rotate(0, turnSpeed, 0);
+        if (this.turnFramesLeft == 0) {
+            FinishTurn();
+        } else {
+            obj.transform.Rotate(0, turnSpeed, 0);
+        }
     }
 
     public static implicit operator bool(PieceObj po) {
