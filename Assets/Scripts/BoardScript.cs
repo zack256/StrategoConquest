@@ -41,6 +41,7 @@ public class BoardScript : MonoBehaviour
     private int playMode;
     private int[] lastPos = new int[] {-1, -1};
     private Dictionary<GameObject, PieceObj> pOMap;
+    private PieceObj currentlyTurning;
 
     private Vector2 boardDims;
     private Vector2 tileDims;
@@ -211,7 +212,12 @@ public class BoardScript : MonoBehaviour
         } else {
             return false;
         }
-        return  (playMode == 0) || ((pieceInfo["team"] == "0") && (pieceInfo["value"] != "B") && (pieceInfo["value"] != "F"));
+        return  (pieceInfo["team"] == "0") && ((playMode == 0) || ((pieceInfo["value"] != "B") && (pieceInfo["value"] != "F")));
+    }
+
+    void StartTurning (PieceObj obj) {
+        currentlyTurning = obj;
+        currentlyTurning.StartTurning();
     }
 
     void MouseHitGameObject (GameObject obj, bool justClicked, bool mouseDown, Vector3 point) {
@@ -273,18 +279,24 @@ public class BoardScript : MonoBehaviour
                             int fightResult = scriptMaster.GetComponent<GameScript>().FightResult(board, pieceData, lastPos, tileLoc, grabbedPiece);
                             if (fightResult == -1) {        // invalid
                                 ResetGrabbedPiece();
-                            } else if (fightResult == 0) {  // attacker win
-                                RemovePieceOffBoard(tileLoc);
-                                MovePieceToTile(tileLoc, obj);
-                            } else if (fightResult == 1) {  // defender win
-                                RemoveGrabbedPiece();
-                            } else {                        // tie
-                                RemovePieceOffBoard(tileLoc);
-                                RemoveGrabbedPiece();
+                            } else {
+                                //playMode = 3;   // fight animation
+                                ResetGrabbedPiece();
+                                StartTurning(board[tileLoc[1], tileLoc[0]]);
+                                if (fightResult == 0) {  // attacker win
+                                    //RemovePieceOffBoard(tileLoc);
+                                    //MovePieceToTile(tileLoc, obj);
+                                } else if (fightResult == 1) {  // defender win
+                                    //RemoveGrabbedPiece();
+                                } else {                        // tie
+                                    //RemovePieceOffBoard(tileLoc);
+                                    //RemoveGrabbedPiece();
+                                }
                             }
                         } else {    // dropping on empty tile.
                             if (scriptMaster.GetComponent<GameScript>().IsValidMove(board, pieceData, lastPos, tileLoc, grabbedPiece)) {
                                 MovePieceToTile(tileLoc, obj);
+                                //playMode = 2;   // cpu turn
                             } else {
                                 ResetGrabbedPiece();
                             }
@@ -566,6 +578,14 @@ public class BoardScript : MonoBehaviour
         RaycastHit hit;
         bool justClicked = Input.GetMouseButtonDown(0);
         bool mouseDown = Input.GetMouseButton(0);
+        if (currentlyTurning) {
+            if (!currentlyTurning.IsTurning()) {
+                currentlyTurning.StopTurning();
+                currentlyTurning = null;
+            } else {
+                currentlyTurning.UpdateTurn();
+            }
+        }
         if (Physics.Raycast(ray, out hit))
         {
             if (hit.transform.gameObject == backgroundObj){

@@ -8,6 +8,7 @@ public class PiecesScript : MonoBehaviour
 
     public GameObject quadImgTemplate;
     public GameObject scriptMaster;
+    public float turnSpeed; // degrees per frame
 
     public Dictionary<string, int> pieceQuantities = new Dictionary<string, int> {
         {"2", 8},
@@ -44,7 +45,7 @@ public class PiecesScript : MonoBehaviour
             piecesDict[item.Key] = new GameObject[item.Value];
             for (int i = 0; i < item.Value; i++) {
                 newQuadImg = Instantiate(quadImgTemplate, new Vector3(0, -20, -0.003f), Quaternion.identity);
-                po = new PieceObj(newQuadImg);
+                po = new PieceObj(newQuadImg, turnSpeed);
                 quadFront = po.GetFront();
                 quadBack = po.GetBack();
                 scriptMaster.GetComponent<ValueLabel>().PositionLabel(quadFront);
@@ -76,7 +77,7 @@ public class PiecesScript : MonoBehaviour
             for (int j = 0; j < enemyValues.GetLength(1); j++) {
                 x = numCols - j - 1;
                 newQuadImg = Instantiate(quadImgTemplate, boardObj.GetComponent<BoardScript>().GetTilePos(x, y), Quaternion.Euler(0, 180, 0));
-                PieceObj po = new PieceObj(newQuadImg);
+                PieceObj po = new PieceObj(newQuadImg, turnSpeed);
                 quadFront = po.GetFront();
                 quadBack = po.GetBack();
                 val = enemyValues[i, j];
