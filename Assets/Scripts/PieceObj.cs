@@ -6,33 +6,38 @@ using UnityEngine;
 public class PieceObj
 {
     private GameObject obj;
-    private float turnSpeed = 0.75f;    // deg per frame
+    private static float turnSpeed = 0.75f;    // deg per frame
     private int turnFramesLeft = 0;
-    private bool facingForward = true;  // false means back is showing.
+    private bool facingForward;  // false means back is showing.
+    private static int totalTurnFrames = (int) Math.Ceiling(180 / turnSpeed);
+    private int team;
+    private string value;
 
-    public PieceObj (GameObject obj) {
+    public PieceObj (GameObject obj, int team, string value, bool facingForward) {
         this.obj = obj;
-    }
-
-    public PieceObj (GameObject obj, bool facingForward) {
-        this.obj = obj;
+        this.team = team;
+        this.value = value;
         this.facingForward = facingForward;
     }
 
     public GameObject GetMain () {
         return obj;
     }
-
     public GameObject GetFront () {
         return obj.transform.GetChild(0).gameObject;
     }
-
     public GameObject GetBack () {
         return obj.transform.GetChild(1).gameObject;
     }
-
-    public GameObject GetLabel () {
+    public GameObject GetLabel () { // front
         return obj.transform.GetChild(0).GetChild(0).gameObject;
+    }
+
+    public int GetTeam () {
+        return team;
+    }
+    public string GetValue () {
+        return value;
     }
 
     public bool IsTurning () {
@@ -59,11 +64,20 @@ public class PieceObj
 
     public void StartTurning () {
         TemporaryVerticalShift(false);
-        this.turnFramesLeft = (int) Math.Ceiling(180 / this.turnSpeed);
+        turnFramesLeft = totalTurnFrames;
     }
 
     public void StopTurning () {
         TemporaryVerticalShift(true);
+    }
+
+    public void ToggleLabel () {
+        GameObject label = GetLabel();
+        label.SetActive(!label.activeSelf);
+    }
+
+    public void ToggleLabel (bool enable) {
+        GetLabel().SetActive(enable);
     }
 
     void FinishTurn () {
@@ -77,6 +91,13 @@ public class PieceObj
 
     public void UpdateTurn () {
         this.turnFramesLeft--;
+        if (turnFramesLeft <= totalTurnFrames / 2) {
+            if (facingForward) {
+                ToggleLabel(false);
+            } else {
+                ToggleLabel(true);
+            }
+        }
         if (this.turnFramesLeft == 0) {
             FinishTurn();
         } else {

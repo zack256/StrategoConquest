@@ -37,7 +37,6 @@ public class BoardScript : MonoBehaviour
     private int numRows;
     private int numCols;
     private bool pieceScrollDisabled = false;
-    private Dictionary<PieceObj, Dictionary<string, string>> pieceData;
     private int playMode;
     private int[] lastPos = new int[] {-1, -1};
     private Dictionary<GameObject, PieceObj> pOMap;
@@ -126,7 +125,7 @@ public class BoardScript : MonoBehaviour
             for (int j = 0; j < board.GetLength(1); j++) {
                 if (board[i, j]) {
                     po = board[i, j];
-                    goodPiecesOnBoard[pieceData[po]["value"]]--;
+                    goodPiecesOnBoard[po.GetValue()]--;
                     po.GetMain().transform.parent = goodPiecesParent.transform;
                     po.ToggleMeshCollider(true);
                     board[i, j] = null;
@@ -161,7 +160,7 @@ public class BoardScript : MonoBehaviour
                     remainingPieces[z].GetMain().transform.parent = boardPiecesParent.transform;
                     board[i, j] = remainingPieces[z];
                     remainingPieces[z].MoveToPos(GetTilePos(j, i));
-                    pieceVal = pieceData[remainingPieces[z]]["value"];
+                    pieceVal = remainingPieces[z].GetValue();
                     if (goodPiecesOnBoard.ContainsKey(pieceVal)) {
                         goodPiecesOnBoard[pieceVal]++;
                     } else {
@@ -218,13 +217,13 @@ public class BoardScript : MonoBehaviour
         if (playMode == 3) {
             return false;
         }
-        Dictionary<string, string> pieceInfo;
+        PieceObj po;
         if (board[pos[1], pos[0]]) {
-            pieceInfo = pieceData[board[pos[1], pos[0]]];
+            po = GetFromBoard(pos);
         } else {
             return false;
         }
-        return  (pieceInfo["team"] == "0") && ((playMode == 0) || ((pieceInfo["value"] != "B") && (pieceInfo["value"] != "F")));
+        return  (po.GetTeam() == 0) && ((playMode == 0) || ((po.GetValue() != "B") && (po.GetValue() != "F")));
     }
 
     void StartTurning (int[] turnerLoc) {
@@ -240,7 +239,7 @@ public class BoardScript : MonoBehaviour
                 if (justClicked && canConfirm) {
                     HideSetupObjs();
                     string[,] enemyValues = scriptMaster.GetComponent<InitEnemy>().InitPieces();
-                    gameObject.GetComponent<PiecesScript>().InitEnemyPieces(boardPiecesParent, board, enemyValues, pieceData, gameObject, "farm");
+                    gameObject.GetComponent<PiecesScript>().InitEnemyPieces(boardPiecesParent, board, enemyValues, gameObject, "farm");
                     playMode = 1;
                 }
             } else {
@@ -288,7 +287,7 @@ public class BoardScript : MonoBehaviour
                     tileLoc = GetTileLoc(obj);
                     if (playMode == 1) {
                         if (board[tileLoc[1], tileLoc[0]]) {
-                            int previousFightResult = scriptMaster.GetComponent<GameScript>().FightResult(board, pieceData, lastPos, tileLoc, grabbedPiece);
+                            int previousFightResult = scriptMaster.GetComponent<GameScript>().FightResult(board, lastPos, tileLoc, grabbedPiece);
                             ResetGrabbedPiece();
                             if (previousFightResult == -1) {        // invalid
                             } else {
@@ -307,7 +306,7 @@ public class BoardScript : MonoBehaviour
                                 }**/
                             }
                         } else {    // dropping on empty tile.
-                            if (scriptMaster.GetComponent<GameScript>().IsValidMove(board, pieceData, lastPos, tileLoc, grabbedPiece)) {
+                            if (scriptMaster.GetComponent<GameScript>().IsValidMove(board, lastPos, tileLoc, grabbedPiece)) {
                                 MovePieceToTile(tileLoc, obj);
                                 //playMode = 2;   // cpu turn
                             } else {
@@ -324,7 +323,7 @@ public class BoardScript : MonoBehaviour
                             board[tileLoc[1], tileLoc[0]] = grabbedPiece;
                             grabbedPiece.MoveToPos(obj);
                             grabbedPiece.GetMain().transform.parent = boardPiecesParent.transform;
-                            string pieceVal = pieceData[grabbedPiece]["value"];
+                            string pieceVal = grabbedPiece.GetValue();
                             if (goodPiecesOnBoard.ContainsKey(pieceVal)) {
                                 goodPiecesOnBoard[pieceVal]++;
                             } else {
@@ -373,7 +372,7 @@ public class BoardScript : MonoBehaviour
                         grabbedPiece = board[tileLoc[1], tileLoc[0]];
                         board[tileLoc[1], tileLoc[0]] = null;
                         if (playMode == 0) {
-                            goodPiecesOnBoard[pieceData[grabbedPiece]["value"]]--;
+                            goodPiecesOnBoard[grabbedPiece.GetValue()]--;
                             grabbedPiece.GetMain().transform.parent = goodPiecesParent.transform;
                         }
                         MoveScreenOverPiece(grabbedPiece.GetMain());  // unnecessary, will do next frame.
@@ -497,9 +496,8 @@ public class BoardScript : MonoBehaviour
         pieceOrderIdx = 0;
         tileToScale = tileParent.transform.GetChild(0).gameObject;
         piecesDict = new Dictionary<string, GameObject[]>();
-        pieceData = new Dictionary<PieceObj, Dictionary<string, string>>();
         pOMap = new Dictionary<GameObject, PieceObj>();
-        gameObject.GetComponent<PiecesScript>().InitPieceQuads("Good", goodPiecesParent, tileToScale, piecesDict, pieceData, pOMap);
+        gameObject.GetComponent<PiecesScript>().InitPieceQuads("Good", goodPiecesParent, tileToScale, piecesDict, pOMap);
         goodPiecesOnBoard = new Dictionary<string, int>();
         ShowPiecesOnSelector();
     }
@@ -552,9 +550,13 @@ public class BoardScript : MonoBehaviour
     }
 
     void TogglePieceLabels () {
-        foreach(KeyValuePair<PieceObj, Dictionary<string, string>> item in pieceData) {
-            if (item.Value["team"] == "0") {
-                scriptMaster.GetComponent<ValueLabel>().ToggleLabel(item.Key);
+        PieceObj po;
+        for (int i = 0; i < numRows; i++) {
+            for (int j = 0; j < numCols; j++) {
+                po = board[i, j];
+                if ((po) && (po.GetTeam() == 0)) {
+                    po.ToggleLabel();
+                }
             }
         }
     }
