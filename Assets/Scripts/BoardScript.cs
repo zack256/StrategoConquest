@@ -44,6 +44,7 @@ public class BoardScript : MonoBehaviour
     private int[] currentlyTurning = new int[] {-1, -1};
     private int previousFightResult;
     private int[] combatantLoc;
+    private int[] defenderLoc;  // ehh
     private int[,] currentlyFading = new int [1, 1];
     private bool isFading = false;
     private GameObject scaledTS;
@@ -296,18 +297,9 @@ public class BoardScript : MonoBehaviour
                             if (previousFightResult == -1) {        // invalid
                             } else {
                                 combatantLoc = lastPos;
+                                defenderLoc = tileLoc;
                                 playMode = 3;   // fight animation
                                 StartTurning(tileLoc);
-                                /**
-                                if (previousFightResult == 0) {  // attacker win
-                                    //RemovePieceOffBoard(tileLoc);
-                                    //MovePieceToTile(tileLoc, obj);
-                                } else if (previousFightResult == 1) {  // defender win
-                                    //RemoveGrabbedPiece();
-                                } else {                        // tie
-                                    //RemovePieceOffBoard(tileLoc);
-                                    //RemoveGrabbedPiece();
-                                }**/
                             }
                         } else {    // dropping on empty tile.
                             if (scriptMaster.GetComponent<GameScript>().IsValidMove(board, lastPos, tileLoc, grabbedPiece)) {
@@ -516,21 +508,46 @@ public class BoardScript : MonoBehaviour
         }
     }
 
-    void ControlBattleResults () {
-        if (previousFightResult == 0) { // attacker wins
-            currentlyFading = new int[1, 2];
-            CopyTo2DList(currentlyFading, currentlyTurning, 0);
-        } else if (previousFightResult == 1) {  // defender wins
-            currentlyFading = new int[1, 2];
-            CopyTo2DList(currentlyFading, combatantLoc, 0);
-        } else {    // tie
-            currentlyFading = new int[2, 2];
-            CopyTo2DList(currentlyFading, combatantLoc, 0);
-            CopyTo2DList(currentlyFading, currentlyTurning, 1);
+    void ControlBattleResults (int stage, int fadingIdx = 0) {
+        if (stage == 0) {   // enemy revealed, now:
+            if (previousFightResult == 0) { // attacker wins
+                currentlyFading = new int[1, 2];
+                CopyTo2DList(currentlyFading, currentlyTurning, 0);
+            } else if (previousFightResult == 1) {  // defender wins
+                currentlyFading = new int[1, 2];
+                CopyTo2DList(currentlyFading, combatantLoc, 0);
+            } else {    // tie
+                currentlyFading = new int[2, 2];
+                CopyTo2DList(currentlyFading, combatantLoc, 0);
+                CopyTo2DList(currentlyFading, currentlyTurning, 1);
+            }
+            MoveTSlidersOverPieces();
+            currentlyTurning = new int[] {-1, -1};
+            isFading = true;
+        } else if (stage == 1) {    // piece(s) have faded
+            PieceObj fadingObj = board[currentlyFading[fadingIdx, 1], currentlyFading[fadingIdx, 0]];
+            fadingObj.GetMain().SetActive(false);
+            fadingObj.RemoveTransparentSlider();
+            if (previousFightResult == 0) {
+                PieceObj combatant = GetFromBoard(combatantLoc);
+                board[combatantLoc[1], combatantLoc[0]] = null;
+                board[currentlyFading[0, 1], currentlyFading[0, 0]] = combatant;
+                combatant.MoveToPos(fadingObj.GetMain());
+            } else if (previousFightResult == 1) {
+                board[currentlyFading[0, 1], currentlyFading[0, 0]] = null;
+                StartTurning(defenderLoc);
+            } else {
+                board[currentlyFading[fadingIdx, 1], currentlyFading[fadingIdx, 0]] = null;
+            }
+            CopyTo2DList(currentlyFading, new int[] {-1, -1}, fadingIdx);
+            fadingObj.MoveToPos(new Vector3(40, 0, 0)); // eh
+            if (previousFightResult != 1) {
+                playMode = 1;   // for now
+            }
+        } else if (stage == 2) {    // victorious defender has turned back around
+            currentlyTurning = new int[] {-1, -1};
+            playMode = 1;   // for now
         }
-        MoveTSlidersOverPieces();
-        currentlyTurning = new int[] {-1, -1};
-        isFading = true;
     }
 
     void InitPieceSelector () {
@@ -645,10 +662,10 @@ public class BoardScript : MonoBehaviour
         if (turnerObj) {
             if (!turnerObj.IsTurning()) {
                 turnerObj.StopTurning();
-                ControlBattleResults();
-                //currentlyTurning = new int[] {-1, -1};
-                if (playMode == 3) {
-                    playMode = 1;   // for now
+                if (turnerObj.IsFaceUp()) {
+                    ControlBattleResults(0);
+                } else {
+                    ControlBattleResults(2);
                 }
             } else {
                 turnerObj.UpdateTurn();
@@ -662,6 +679,7 @@ public class BoardScript : MonoBehaviour
                 fadingObj.UpdateFade();
                 if (!fadingObj.IsFading()) {
                     isFading = false;
+                    ControlBattleResults(1, i);
                 }
             }
         }

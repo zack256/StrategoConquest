@@ -38,8 +38,15 @@ public class PieceObj
     public GameObject GetLabel () { // front
         return obj.transform.GetChild(0).GetChild(0).gameObject;
     }
+    public bool IsFaceUp() {
+        return facingForward;
+    }
     public void SetTransparentSlider (GameObject slider) {
         transparentSlider = slider;
+    }
+    public void RemoveTransparentSlider () {
+        GameObject.Destroy(transparentSlider);
+        transparentSlider = null;
     }
 
     public int GetTeam () {
@@ -119,9 +126,9 @@ public class PieceObj
     }
 
     void FinishFade () {
-        Color color = transparentSlider.GetComponent<Renderer>().material.color;
-        color.a = 255;
-        transparentSlider.GetComponent<Renderer>().material.color = color;
+        Color32 col = transparentSlider.GetComponent<Renderer>().material.GetColor("_Color");
+        col.a = 255;
+        transparentSlider.GetComponent<Renderer>().material.SetColor("_Color", col);
     }
 
     public void UpdateFade () {
