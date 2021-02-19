@@ -8,10 +8,16 @@ public class PieceObj
     private GameObject obj;
     private static float turnSpeed = 0.75f;    // deg per frame
     private int turnFramesLeft = 0;
-    private bool facingForward;  // false means back is showing.
     private static int totalTurnFrames = (int) Math.Ceiling(180 / turnSpeed);
+
+    private int fadeFramesLeft = 0;
+    private static int totalFadeFrames = totalTurnFrames;
+    private static float fadeSpeed = 256f / totalFadeFrames;
+
+    private bool facingForward;  // false means back is showing.
     private int team;
     private string value;
+    private GameObject transparentSlider;
 
     public PieceObj (GameObject obj, int team, string value, bool facingForward) {
         this.obj = obj;
@@ -32,6 +38,9 @@ public class PieceObj
     public GameObject GetLabel () { // front
         return obj.transform.GetChild(0).GetChild(0).gameObject;
     }
+    public void SetTransparentSlider (GameObject slider) {
+        transparentSlider = slider;
+    }
 
     public int GetTeam () {
         return team;
@@ -43,6 +52,9 @@ public class PieceObj
     public bool IsTurning () {
         return this.turnFramesLeft > 0;
     }
+    public bool IsFading () {
+        return this.fadeFramesLeft > 0;
+    }
 
     public void ToggleMeshCollider (bool enable) {
         obj.GetComponent<MeshCollider>().enabled = enable;
@@ -51,7 +63,6 @@ public class PieceObj
     public void MoveToPos (Vector3 newPos) {
         obj.transform.position = newPos;
     }
-
     public void MoveToPos (GameObject destObj) {
         MoveToPos(destObj.transform.position);
     }
@@ -66,16 +77,18 @@ public class PieceObj
         TemporaryVerticalShift(false);
         turnFramesLeft = totalTurnFrames;
     }
-
     public void StopTurning () {
         TemporaryVerticalShift(true);
+    }
+
+    public void StartFading () {
+        fadeFramesLeft = totalFadeFrames;
     }
 
     public void ToggleLabel () {
         GameObject label = GetLabel();
         label.SetActive(!label.activeSelf);
     }
-
     public void ToggleLabel (bool enable) {
         GetLabel().SetActive(enable);
     }
@@ -102,6 +115,23 @@ public class PieceObj
             FinishTurn();
         } else {
             obj.transform.Rotate(0, turnSpeed, 0);
+        }
+    }
+
+    void FinishFade () {
+        Color color = transparentSlider.GetComponent<Renderer>().material.color;
+        color.a = 255;
+        transparentSlider.GetComponent<Renderer>().material.color = color;
+    }
+
+    public void UpdateFade () {
+        this.fadeFramesLeft--;
+        if (this.fadeFramesLeft == 0) {
+            FinishFade();
+        } else {
+            Color32 col = transparentSlider.GetComponent<Renderer>().material.GetColor("_Color");
+            col.a = (byte) ((int) ((totalFadeFrames - fadeFramesLeft) * fadeSpeed));
+            transparentSlider.GetComponent<Renderer>().material.SetColor("_Color", col);
         }
     }
 
