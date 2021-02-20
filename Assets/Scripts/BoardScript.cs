@@ -508,6 +508,13 @@ public class BoardScript : MonoBehaviour
         }
     }
 
+    void BaseCPUTurn () {
+        playMode = 2;   // cpu turn
+        int[,] res = scriptMaster.GetComponent<GameScript>().AIRandomMove0(board);
+        board[res[0, 0], res[0, 1]].MoveToPos(GetTilePos(res[1, 1], res[1, 0]));
+        playMode = 1;
+    }
+
     void ControlBattleResults (int stage, int fadingIdx = 0) {
         if (stage == 0) {   // enemy revealed, now:
             if (previousFightResult == 0) { // attacker wins
@@ -533,20 +540,19 @@ public class BoardScript : MonoBehaviour
                 board[combatantLoc[1], combatantLoc[0]] = null;
                 board[currentlyFading[0, 1], currentlyFading[0, 0]] = combatant;
                 combatant.MoveToPos(fadingObj.GetMain());
+                BaseCPUTurn();
             } else if (previousFightResult == 1) {
                 board[currentlyFading[0, 1], currentlyFading[0, 0]] = null;
                 StartTurning(defenderLoc);
             } else {
                 board[currentlyFading[fadingIdx, 1], currentlyFading[fadingIdx, 0]] = null;
+                BaseCPUTurn();
             }
             CopyTo2DList(currentlyFading, new int[] {-1, -1}, fadingIdx);
             fadingObj.MoveToPos(new Vector3(40, 0, 0)); // eh
-            if (previousFightResult != 1) {
-                playMode = 1;   // for now
-            }
         } else if (stage == 2) {    // victorious defender has turned back around
             currentlyTurning = new int[] {-1, -1};
-            playMode = 1;   // for now
+            BaseCPUTurn();
         }
     }
 
