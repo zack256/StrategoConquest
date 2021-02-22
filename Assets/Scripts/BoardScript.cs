@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using UnityEngine.UI;
 
 public class BoardScript : MonoBehaviour
 {
@@ -20,7 +21,9 @@ public class BoardScript : MonoBehaviour
     public GameObject confirmPiecesBtn;
     public GameObject resetPiecesBtn;
     public GameObject randomPiecesBtn;
+    public GameObject continueBtn;
     public GameObject transparentSliderQuad;
+    public GameObject gameOverText;
 
     private GameObject currentlyOver;
     private GameObject currentPiece;
@@ -274,6 +277,18 @@ public class BoardScript : MonoBehaviour
         } else {
             randomPiecesBtn.GetComponent<ControlBtns>().ResetHighlight();
         }
+        if (obj.transform.parent == continueBtn.transform) {
+            if (mouseDown) {
+                if (justClicked) {
+                    scriptMaster.GetComponent<MapScript>().TransitionToMap();
+                }
+                continueBtn.GetComponent<ControlBtns>().Highlight();
+            } else {
+                continueBtn.GetComponent<ControlBtns>().ResetHighlight();
+            }
+        } else {
+            continueBtn.GetComponent<ControlBtns>().ResetHighlight();
+        }
         int[] tileLoc;
         if (grabbedPiece) { // playmode is either 0 or 1.
             if (mouseDown) {
@@ -504,6 +519,19 @@ public class BoardScript : MonoBehaviour
         }
     }
 
+    void DisplayGameOverText (int winner) {
+        string[] messages = new string[] {"Victory!", "Defeat!", "Tie!"};
+        GameObject textObj = gameOverText.transform.GetChild(0).GetChild(0).gameObject;
+        textObj.GetComponent<Text>().text = messages[winner];
+        gameOverText.SetActive(true);
+    }
+
+    void SetUpGameOver (int winner) {   // 0 = human, 1 = cpu, 2 = tie (?+)
+        playMode = 5;
+        DisplayGameOverText(winner);
+        continueBtn.SetActive(true);
+    }
+
     void BaseCPUTurn () {
         playMode = 2;   // cpu turn
         int[,] res = scriptMaster.GetComponent<GameScript>().AIRandomMove0(board);
@@ -556,6 +584,9 @@ public class BoardScript : MonoBehaviour
             }
             CopyTo2DList(currentlyFading, new int[] {-1, -1}, fadingIdx);
             fadingObj.MoveToPos(new Vector3(40, 0, 0)); // eh
+            if (fadingObj.GetValue() == "F") {
+                SetUpGameOver(0); return;
+            }
             if ((previousFightResult != 1) && (fadingIdx == currentlyFading.GetLength(0) - 1)) {
                 BaseCPUTurn();
             }
@@ -587,7 +618,11 @@ public class BoardScript : MonoBehaviour
                 board[combatantLoc[1], combatantLoc[0]] = null;
                 board[defenderLoc[1], defenderLoc[0]] = combatant;
                 combatant.MoveToPos(fadingObj.GetMain());
-                StartTurning(defenderLoc);  // cpu attacked and won, so turns now.
+                if (fadingObj.GetValue() == "F") {
+                    SetUpGameOver(1); return;
+                } else {
+                    StartTurning(defenderLoc);  // cpu attacked and won, so turns now.
+                }
             } else if (previousFightResult == 1) {
                 board[currentlyFading[0, 1], currentlyFading[0, 0]] = null;
             } else {
@@ -695,6 +730,7 @@ public class BoardScript : MonoBehaviour
     void InitTSlider () {
         scaledTS = Instantiate(transparentSliderQuad, new Vector3(100, 0, 0), Quaternion.identity);
         scriptMaster.GetComponent<ScaleScript>().ScaleGameObject(scaledTS, tileToScale);
+        scaledTS.transform.parent = gameObject.transform.parent;
     }
 
     void Start()

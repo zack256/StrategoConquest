@@ -175,6 +175,9 @@ public class GameScript : MonoBehaviour
                 }
             }
         }
+        if (locations.Count == 0) {
+            Debug.Log("enemy cant move!");
+        }
         System.Random rand = new System.Random();
         int idx = rand.Next(locations.Count);
         pos = locations[idx];

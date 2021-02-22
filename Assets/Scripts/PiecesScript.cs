@@ -86,6 +86,9 @@ public class PiecesScript : MonoBehaviour
                 quadFront.GetComponent<Renderer>().material.mainTexture = frontTex;
                 board[y, x] = po;
                 po.ToggleLabel(false);
+                if (val == "F") {
+                    Debug.Log(y + " ll " + x);
+                }
             }
         }
     }
