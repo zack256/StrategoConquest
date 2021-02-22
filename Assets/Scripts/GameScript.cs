@@ -10,8 +10,40 @@ public class GameScript : MonoBehaviour
         return Math.Abs(pos1[0] - pos2[0]) + Math.Abs(pos1[1] - pos2[1]) == 1;
     }
 
-    bool IsStraightLine (int[] pos1, int[] pos2) {  // hopover bug
+    bool IsStraightLine (int[] pos1, int[] pos2) {
         return (pos1[0] == pos2[0]) ^ (pos1[1] == pos2[1]);
+    }
+
+    bool IsClearStraightLine (PieceObj[,] board, int[] pos1, int[] pos2) {
+        // every tile btwn is clear.
+        if (!IsStraightLine(pos1, pos2)) {
+            return false;
+        }
+        int[] start, finish;
+        if (pos1[0] != pos2[0]) {
+            if (pos1[0] > pos2[0]) {
+                start = pos2; finish = pos1;
+            } else {
+                start = pos1; finish = pos2;
+            }
+            for (int i = start[0] + 1; i < finish[0]; i++) {
+                if (board[start[1], i]) {
+                    return false;
+                }
+            }
+        } else {
+            if (pos1[1] > pos2[1]) {
+                start = pos2; finish = pos1;
+            } else {
+                start = pos1; finish = pos2;
+            }
+            for (int i = start[1] + 1; i < finish[1]; i++) {
+                if (board[i, start[0]]) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     public bool IsValidMove (PieceObj[,] board, int[] startPos, int[] destPos, PieceObj mover) {
@@ -20,7 +52,7 @@ public class GameScript : MonoBehaviour
             return false;
         }
         if (mover.GetValue() == "2") {
-            return IsStraightLine(startPos, destPos);
+            return IsClearStraightLine(board, startPos, destPos);
         }
         return IsAdjacent(startPos, destPos);
     }
@@ -163,11 +195,11 @@ public class GameScript : MonoBehaviour
                     end = board.GetLength(1);
                 }
                 if (d == 0) {
-                    dx = 0; dy = -1;
+                    dx = 0; dy = 1;
                 } else if (d == 1) {
                     dx = 1; dy = 0;
                 } else if (d == 2) {
-                    dx = -1; dy = 1;
+                    dx = 0; dy = -1;
                 } else {
                     dx = -1; dy = 0;
                 }

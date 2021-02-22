@@ -111,13 +111,9 @@ public class BoardScript : MonoBehaviour
     }
 
     int[] GetTileLoc (GameObject obj) {
-        float boardWidth = gameObject.GetComponent<Renderer>().bounds.size[0];
-        float boardHeight = gameObject.GetComponent<Renderer>().bounds.size[1];
-        float tileWidth = boardWidth / numCols;
-        float tileHeight = boardHeight / numRows;
-        float x = obj.transform.position.x - (gameObject.transform.position.x - boardWidth / 2);
-        float y = obj.transform.position.y - (gameObject.transform.position.y - boardHeight / 2);
-        return new int[2] {(int) (x / tileWidth), (int) (y / tileHeight)};
+        float x = obj.transform.position.x - (gameObject.transform.position.x - boardDims[0] / 2);
+        float y = obj.transform.position.y - (gameObject.transform.position.y - boardDims[1] / 2);
+        return new int[2] {(int) (x / tileDims[0]), (int) (y / tileDims[1])};
     }
 
     public Vector3 GetTilePos (int x, int y, float zPos = -0.0001f) {
@@ -219,7 +215,7 @@ public class BoardScript : MonoBehaviour
     }
 
     bool CanGrabOffBoard (int[] pos) {
-        if (playMode == 3) {
+        if (playMode > 1) {
             return false;
         }
         PieceObj po;
@@ -279,7 +275,7 @@ public class BoardScript : MonoBehaviour
             randomPiecesBtn.GetComponent<ControlBtns>().ResetHighlight();
         }
         int[] tileLoc;
-        if (grabbedPiece) {
+        if (grabbedPiece) { // playmode is either 0 or 1.
             if (mouseDown) {
                 grabbedPiece.MoveToPos(point);
                 MoveScreenOverPiece(grabbedPiece.GetMain());
@@ -518,7 +514,7 @@ public class BoardScript : MonoBehaviour
         if (!defender) {    // no attack
             board[startPos[1], startPos[0]] = null;
             board[destPos[1], destPos[0]] = attacker;
-            attacker.MoveToPos(GetTilePos(res[1, 1], res[1, 0]));
+            attacker.MoveToPos(GetTilePos(destPos[0], destPos[1]));
             playMode = 1;
         } else {
             combatantLoc = startPos;
@@ -589,7 +585,7 @@ public class BoardScript : MonoBehaviour
             if (previousFightResult == 0) {
                 PieceObj combatant = GetFromBoard(combatantLoc);
                 board[combatantLoc[1], combatantLoc[0]] = null;
-                board[currentlyFading[0, 1], currentlyFading[0, 0]] = combatant;
+                board[defenderLoc[1], defenderLoc[0]] = combatant;
                 combatant.MoveToPos(fadingObj.GetMain());
                 StartTurning(defenderLoc);  // cpu attacked and won, so turns now.
             } else if (previousFightResult == 1) {
@@ -597,10 +593,17 @@ public class BoardScript : MonoBehaviour
             } else {
                 board[currentlyFading[fadingIdx, 1], currentlyFading[fadingIdx, 0]] = null;
             }
-            CopyTo2DList(currentlyFading, new int[] {-1, -1}, fadingIdx);
             fadingObj.MoveToPos(new Vector3(40, 0, 0)); // eh
+            if (fadingIdx == currentlyFading.GetLength(0) - 1) {
+                //currentlyFading = new int[] {-1, -1};
+                if (previousFightResult != 0) {
+                    playMode = 1;
+                }
+            }
+        } else if (stage == 5) {    // enemy piece turned around after attacking.
+            currentlyTurning = new int[] {-1, -1};
             playMode = 1;
-        } 
+        }
     }
 
     void InitPieceSelector () {
@@ -716,7 +719,11 @@ public class BoardScript : MonoBehaviour
             if (!turnerObj.IsTurning()) {
                 turnerObj.StopTurning();
                 if (playMode == 2) {  // turning piece is attacking
-                    ControlBattleResults(3);
+                    if (turnerObj.IsFaceUp()) {
+                        ControlBattleResults(3);    // starting attacking
+                    } else {
+                        ControlBattleResults(5);    // finished attacking
+                    }
                 } else {
                     if (turnerObj.IsFaceUp()) { // is defending
                         ControlBattleResults(0);

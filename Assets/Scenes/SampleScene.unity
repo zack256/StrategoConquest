@@ -532,6 +532,8 @@ MonoBehaviour:
   confirmPiecesBtn: {fileID: 1995155588}
   resetPiecesBtn: {fileID: 1539542857}
   randomPiecesBtn: {fileID: 1461138287}
+  transparentSliderQuad: {fileID: 3301077067054936808, guid: be15e88cff9cc4a5fb8eff3834f93f2f,
+    type: 3}
 --- !u!64 &382434859
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -624,7 +626,6 @@ MonoBehaviour:
   quadImgTemplate: {fileID: 7367520253785496901, guid: c2bd795c3807345bd902a29ee19bd548,
     type: 3}
   scriptMaster: {fileID: 32300312}
-  turnSpeed: 0.5
 --- !u!1 &472318670
 GameObject:
   m_ObjectHideFlags: 0
