@@ -6,7 +6,7 @@ using UnityEngine;
 public class CircleMesh : MonoBehaviour
 {
 
-    public GameObject scriptMaster;
+    //public GameObject scriptMaster;
 
     public int sides;   // will make a regular [sides]-gon
 
@@ -35,6 +35,7 @@ public class CircleMesh : MonoBehaviour
         Vector3[] vertices = new Vector3[sides + 1];
         int[] triangles;
         triangles = CreateCircleMesh(vertices);
+        GameObject scriptMaster = GameObject.Find("Script Master"); // improve!!
         scriptMaster.GetComponent<MeshScript>().RedoMesh(gameObject, vertices, triangles);
     } 
 }
