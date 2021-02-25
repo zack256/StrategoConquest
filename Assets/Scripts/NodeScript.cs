@@ -29,6 +29,7 @@ public class NodeScript : MonoBehaviour
             node = Instantiate(nodeTemplate, new Vector3(xCoord, yCoord, -0.006f), Quaternion.identity);
             node.transform.parent = nodesParent.transform;
             gameLvl = new GameLevel(levelName, node);
+            node.GetComponent<HighlightNode>().SetAccessLevel(gameLvl);
             levels[i] = gameLvl;
             andReqsLine = lines[3 * i + 1].Split(',');
             gameLvl.LoadANDReqs(andReqsLine);

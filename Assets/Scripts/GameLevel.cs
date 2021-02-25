@@ -5,7 +5,7 @@ using UnityEngine;
 public class GameLevel
 {
     private string levelName;
-    private int accessLevel = 0;    // 0 = locked. 1 = unbeaten. 2 = beaten.
+    private int accessLevel = 1;    // 0 = locked. 1 = unbeaten. 2 = beaten.
     private HashSet<string> andReqs = new HashSet<string>();
     private List<string> orReqs = new List<string>();
     private GameObject nodeObj;

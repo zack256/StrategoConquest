@@ -12,15 +12,27 @@ public class MapScript : MonoBehaviour
 
     private GameLevel[] gameLevels;
     private Dictionary<GameObject, GameLevel> nodeMap;
+    private GameObject overNode = null;
 
     bool IsMapNode (GameObject obj) {
         return obj.transform.parent.gameObject == nodeParent;
     }
     
+    void HighlightMapNode (GameObject nodeObj, bool mouseDown) {
+        overNode = nodeObj;
+        GameLevel gl = nodeMap[nodeObj];
+        nodeObj.GetComponent<HighlightNode>().MouseOverNode(mouseDown);
+    }
+
+    void ResetNodeHighlight (GameObject nodeObj) {
+        if (nodeObj) {
+            nodeObj.GetComponent<HighlightNode>().ResetMaterial();
+        }
+    }
+
     void MouseHitGameObject (GameObject obj, bool justClicked, bool mouseDown, Vector3 point) {
         if (IsMapNode(obj)) {
-            GameLevel gl = nodeMap[obj];
-            Debug.Log(gl.GetName());
+            HighlightMapNode(obj, mouseDown);
         }
     }
 
@@ -49,6 +61,9 @@ public class MapScript : MonoBehaviour
         RaycastHit hit;
         bool justClicked = Input.GetMouseButtonDown(0);
         bool mouseDown = Input.GetMouseButton(0);
+
+        ResetNodeHighlight(overNode);
+        overNode = null;
 
         if (Physics.Raycast(ray, out hit))
         {

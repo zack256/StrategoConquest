@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6934241592997046660}
   - component: {fileID: 6934241592997046661}
   - component: {fileID: 6934241592997046659}
+  - component: {fileID: -2239904813401671254}
   m_Layer: 0
   m_Name: Circle Node
   m_TagString: Untagged
@@ -93,3 +94,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sides: 30
+--- !u!114 &-2239904813401671254
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6934241592997046656}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff4c585a1039148e795a8e9b9d3329f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lockedMaterial:
+  - {fileID: 2100000, guid: 6d780bcbc57af4099950811e5bf9ceeb, type: 2}
+  - {fileID: 2100000, guid: 6d780bcbc57af4099950811e5bf9ceeb, type: 2}
+  - {fileID: 2100000, guid: 681129f04a0ad4b1abfc2d287bfdeeb2, type: 2}
+  unbeatenMaterial:
+  - {fileID: 2100000, guid: 6c24cc3d76503491fba4e42d1f8fe67b, type: 2}
+  - {fileID: 2100000, guid: 96b9a73cbc6f14ea4a8d7db92b0dbd74, type: 2}
+  - {fileID: 2100000, guid: da2f55c437cb148a1aa816d87fe3796e, type: 2}
+  beatenMaterial:
+  - {fileID: 2100000, guid: 96b9a73cbc6f14ea4a8d7db92b0dbd74, type: 2}
+  - {fileID: 2100000, guid: 96b9a73cbc6f14ea4a8d7db92b0dbd74, type: 2}
+  - {fileID: 2100000, guid: da2f55c437cb148a1aa816d87fe3796e, type: 2}
