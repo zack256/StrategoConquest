@@ -280,7 +280,7 @@ public class BoardScript : MonoBehaviour
         if (obj.transform.parent == continueBtn.transform) {
             if (mouseDown) {
                 if (justClicked) {
-                    scriptMaster.GetComponent<MapScript>().TransitionToMap();
+                    scriptMaster.GetComponent<TransitionScript>().TransitionToMap();
                 }
                 continueBtn.GetComponent<ControlBtns>().Highlight();
             } else {

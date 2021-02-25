@@ -8,9 +8,11 @@ public class GameLevel
     private int accessLevel = 0;    // 0 = locked. 1 = unbeaten. 2 = beaten.
     private HashSet<string> andReqs = new HashSet<string>();
     private List<string> orReqs = new List<string>();
+    private GameObject nodeObj;
 
-    public GameLevel (string levelName) {
+    public GameLevel (string levelName, GameObject nodeObj) {
         this.levelName = levelName;
+        this.nodeObj = nodeObj;
     }
 
     public string GetName () {
@@ -18,6 +20,9 @@ public class GameLevel
     }
     public int GetAccess () {
         return this.accessLevel;
+    }
+    public GameObject GetNodeObj () {
+        return this.nodeObj;
     }
 
     public void LoadANDReqs (string[] row) {

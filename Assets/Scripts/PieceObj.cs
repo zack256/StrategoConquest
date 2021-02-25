@@ -6,7 +6,7 @@ using UnityEngine;
 public class PieceObj
 {
     private GameObject obj;
-    private static float turnSpeed = 0.75f;    // deg per frame
+    private static float turnSpeed = 5f;    // deg per frame (was 0.75 w/o testing)
     private int turnFramesLeft = 0;
     private static int totalTurnFrames = (int) Math.Ceiling(180 / turnSpeed);
 
