@@ -45,17 +45,22 @@ public class NodeScript : MonoBehaviour
             node = Instantiate(nodeTemplate, GetNodePos(xCoord, yCoord), Quaternion.identity);
             node.transform.parent = nodesParent.transform;
             gameLvl = new GameLevel(levelName, node);
-            node.GetComponent<HighlightNode>().SetAccessLevel(gameLvl);
             levels[i] = gameLvl;
             andReqsLine = lines[3 * i + 1].Trim().Split(',');
             gameLvl.LoadANDReqs(andReqsLine);
             orReqsLine = lines[3 * i + 2].Trim().Split(',');
             gameLvl.LoadORReqs(orReqsLine);
+            gameLvl.TryToUnlockLevel();
+            node.GetComponent<HighlightNode>().SetAccessLevel(gameLvl);
         }
         return levels;
     }
 
-    void Start () {
+    void Awake () {
         CalculateMapProps();
+    }
+
+    void Start () {
+        
     }
 }

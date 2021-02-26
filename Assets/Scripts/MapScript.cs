@@ -27,17 +27,29 @@ public class MapScript : MonoBehaviour
     void ResetNodeHighlight (GameObject nodeObj) {
         if (nodeObj) {
             nodeObj.GetComponent<HighlightNode>().ResetMaterial();
+            overNode = null;
         }
     }
 
     void MouseHitGameObject (GameObject obj, bool justClicked, bool mouseDown, Vector3 point) {
         if (IsMapNode(obj)) {
+            if (obj != overNode) {
+                ResetNodeHighlight(overNode);
+            } 
             HighlightMapNode(obj, mouseDown);
+            if (justClicked) {
+                GameLevel gl = nodeMap[obj];
+                if (gl.GetAccess() != 0) {
+                    scriptMaster.GetComponent<TransitionScript>().TransitionToGame();
+                }
+            }
+        } else {
+            ResetNodeHighlight(overNode);
         }
     }
 
     void MouseHitNoGameObject (bool justClicked, bool mouseDown, Vector3 point) {
-
+        ResetNodeHighlight(overNode);
     }
 
     void CreateNodeMap () {
@@ -55,9 +67,8 @@ public class MapScript : MonoBehaviour
         string lvlName = newlyBeaten.GetName();
         for (int i = 0; i < gameLevels.Length; i++) {
             gl = gameLevels[i];
-            if (gl.AccountForBeatenLevel(lvlName)) {
-                gl.UnlockLevel();
-            }
+            gl.AccountForBeatenLevel(lvlName);
+            gl.TryToUnlockLevel();
         }
     }
     
@@ -70,11 +81,9 @@ public class MapScript : MonoBehaviour
     void Update () {
         Ray ray = cameraObject.GetComponent<CameraScript>().GetCameraRay();
         RaycastHit hit;
-        bool justClicked = Input.GetMouseButtonDown(0);
+        //bool justClicked = Input.GetMouseButtonDown(0);
+        bool justClicked = Input.GetMouseButtonUp(0);
         bool mouseDown = Input.GetMouseButton(0);
-
-        ResetNodeHighlight(overNode);
-        overNode = null;
 
         if (Physics.Raycast(ray, out hit))
         {

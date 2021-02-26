@@ -5,7 +5,7 @@ using UnityEngine;
 public class GameLevel
 {
     private string levelName;
-    private int accessLevel = 1;    // 0 = locked. 1 = unbeaten. 2 = beaten.
+    private int accessLevel = 0;    // 0 = locked. 1 = unbeaten. 2 = beaten.
     private HashSet<string> andReqs = new HashSet<string>();
     private HashSet<string> orReqs = new HashSet<string>();
     private GameObject nodeObj;
@@ -37,7 +37,7 @@ public class GameLevel
         }
     }
 
-    public void UnlockLevel () {
+    void UnlockLevel () {
         if (accessLevel == 0) {
             accessLevel = 1;
         }
@@ -51,9 +51,16 @@ public class GameLevel
             orReqs = new HashSet<string>();
         }
     }
-    public bool AccountForBeatenLevel (string newlyBeaten) {
+    bool ReqsCompleted () {
+        return andReqs.Count + orReqs.Count == 0;
+    }
+    public void TryToUnlockLevel () {
+        if (ReqsCompleted()) {
+            UnlockLevel();
+        }
+    }
+    public void AccountForBeatenLevel (string newlyBeaten) {
         WorkOnANDReqs(newlyBeaten);
         WorkOnORReqs(newlyBeaten);
-        return andReqs.Count + orReqs.Count == 0;
     }
 }

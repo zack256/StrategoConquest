@@ -143,9 +143,9 @@ public class BoardScript : MonoBehaviour
         return loc[1] < 4;  // bottom 4 rows
     }
 
-    void HideSetupObjs () {
-        pieceMenuRect.transform.parent.gameObject.SetActive(false);
-        confirmPiecesBtn.transform.parent.gameObject.SetActive(false);
+    void ToggleSetupObjs (bool enable) {
+        pieceMenuRect.transform.parent.gameObject.SetActive(enable);
+        confirmPiecesBtn.transform.parent.gameObject.SetActive(enable);
     }
 
     void RandomizeGoodPieces () {
@@ -235,13 +235,19 @@ public class BoardScript : MonoBehaviour
         GetFromBoard(currentlyTurning).StartTurning();
     }
 
+    public void CleanUpBeforeGameStart() {
+        gameOverText.SetActive(false);
+        continueBtn.SetActive(false);
+        ToggleSetupObjs(true);
+    }
+
     void MouseHitGameObject (GameObject obj, bool justClicked, bool mouseDown, Vector3 point) {
         if ((!grabbedPiece) && (obj.transform.parent == confirmPiecesBtn.transform)) {
             if (mouseDown) {
                 bool canConfirm = goodPiecesParent.transform.childCount == 0;
                 confirmPiecesBtn.GetComponent<ControlBtns>().Highlight(!canConfirm);
                 if (justClicked && canConfirm) {
-                    HideSetupObjs();
+                    ToggleSetupObjs(false);
                     string[,] enemyValues = scriptMaster.GetComponent<InitEnemy>().InitPieces();
                     gameObject.GetComponent<PiecesScript>().InitEnemyPieces(boardPiecesParent, board, enemyValues, gameObject, "farm");
                     playMode = 1;
