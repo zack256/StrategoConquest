@@ -45,8 +45,19 @@ public class MapScript : MonoBehaviour
         nodeMap = new Dictionary<GameObject, GameLevel>();
         for (int i = 0; i < gameLevels.Length; i++) {
             gl = gameLevels[i];
-            Debug.Log(gl.GetName() + i);
             nodeMap[gl.GetNodeObj()] = gl;
+        }
+    }
+
+    void UpdateLevelAccesses (GameLevel newlyBeaten) {
+        GameLevel gl;
+        bool res;
+        string lvlName = newlyBeaten.GetName();
+        for (int i = 0; i < gameLevels.Length; i++) {
+            gl = gameLevels[i];
+            if (gl.AccountForBeatenLevel(lvlName)) {
+                gl.UnlockLevel();
+            }
         }
     }
     

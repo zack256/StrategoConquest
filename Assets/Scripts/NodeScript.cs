@@ -9,6 +9,22 @@ public class NodeScript : MonoBehaviour
     public GameObject nodeTemplate;
     public GameObject nodesParent;
 
+    private Vector3 lowerLeft;
+    private Vector3 mapDims;
+
+    private void CalculateMapProps () {
+        Vector3 pos = gameObject.transform.position;
+        mapDims = gameObject.GetComponent<Renderer>().bounds.size;
+        float x = pos.x - mapDims.x / 2f;
+        float y = pos.y - mapDims.y / 2f;
+        lowerLeft = new Vector3(x, y, -0.006f);
+    }
+
+    private Vector3 GetNodePos (float xCoord, float yCoord) {
+        // Given coords are btwn 0-100, returns actual coordinates.
+        return new Vector3(lowerLeft.x + xCoord * (mapDims.x / 100f), lowerLeft.y + yCoord * (mapDims.y / 100f), lowerLeft.z);
+    }
+
     public GameLevel[] CreateGameLevels () {
         string nodeCSVPath = Application.dataPath + "/Files/nodes.csv";
         string fileData = File.ReadAllText(nodeCSVPath);
@@ -26,26 +42,20 @@ public class NodeScript : MonoBehaviour
             levelName = cells[0];
             xCoord = float.Parse(cells[1]);
             yCoord = float.Parse(cells[2]);
-            node = Instantiate(nodeTemplate, new Vector3(xCoord, yCoord, -0.006f), Quaternion.identity);
+            node = Instantiate(nodeTemplate, GetNodePos(xCoord, yCoord), Quaternion.identity);
             node.transform.parent = nodesParent.transform;
             gameLvl = new GameLevel(levelName, node);
             node.GetComponent<HighlightNode>().SetAccessLevel(gameLvl);
             levels[i] = gameLvl;
-            andReqsLine = lines[3 * i + 1].Split(',');
+            andReqsLine = lines[3 * i + 1].Trim().Split(',');
             gameLvl.LoadANDReqs(andReqsLine);
-            orReqsLine = lines[3 * i + 2].Split(',');
+            orReqsLine = lines[3 * i + 2].Trim().Split(',');
             gameLvl.LoadORReqs(orReqsLine);
         }
         return levels;
     }
-    /**
-    void Start()
-    {
-        //CreateNodes();
+
+    void Start () {
+        CalculateMapProps();
     }
-    void Update()
-    {
-        
-    }
-    **/
 }

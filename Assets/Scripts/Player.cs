@@ -6,6 +6,7 @@ public class Player
 {
     private int cash;
     private Dictionary<string, int> pieceAmts;
+    private List<string> levelsBeaten = new List<string>();
 
     public Player (int cash, Dictionary<string, int> pieceAmts) {
         this.cash = cash;
@@ -17,6 +18,9 @@ public class Player
     }
     public Dictionary<string, int> GetPieceAmts () {
         return this.pieceAmts;
+    }
+    public List<string> GetLevelsBeaten () {
+        return this.levelsBeaten;
     }
 
 
