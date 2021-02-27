@@ -24,11 +24,13 @@ public class BoardScript : MonoBehaviour
     public GameObject continueBtn;
     public GameObject transparentSliderQuad;
     public GameObject gameOverText;
+    public GameObject mapObj;
 
     private GameObject currentlyOver;
     private GameObject currentPiece;
     private Dictionary<string, int> goodPiecesOnBoard;
-    private string[] pieceOrder = new string[12] {"2", "3", "4", "5", "6", "7", "8", "9", "10", "S", "B", "F"};
+    //private string[] pieceOrder = new string[12] {"2", "3", "4", "5", "6", "7", "8", "9", "10", "S", "B", "F"};
+    private string[] pieceOrder;
     private int pieceOrderIdx = 0;
     private Dictionary<string, GameObject[]> piecesDict;
     private GameObject tileToScale;
@@ -51,10 +53,10 @@ public class BoardScript : MonoBehaviour
     private int[,] currentlyFading = new int [1, 1];
     private bool isFading = false;
     private GameObject scaledTS;
-
     private Vector2 boardDims;
     private Vector2 tileDims;
     private Vector2 lowerLeft;
+    private Player player;
 
     bool ObjectIsTile (GameObject obj) {
         return obj.transform.parent == tileParent.transform;
@@ -160,6 +162,9 @@ public class BoardScript : MonoBehaviour
         string pieceVal;
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 10; j++) {
+                if (z >= numRemaining) {
+                    return;
+                }
                 if (!board[i, j]) {
                     remainingPieces[z].GetMain().transform.parent = boardPiecesParent.transform;
                     board[i, j] = remainingPieces[z];
@@ -235,10 +240,10 @@ public class BoardScript : MonoBehaviour
         GetFromBoard(currentlyTurning).StartTurning();
     }
 
-    public void CleanUpBeforeGameStart() {
-        gameOverText.SetActive(false);
-        continueBtn.SetActive(false);
-        ToggleSetupObjs(true);
+    void DeleteAllPieces () {
+        foreach (Transform child in boardPiecesParent.transform) {
+            GameObject.Destroy(child.gameObject);
+        }
     }
 
     void MouseHitGameObject (GameObject obj, bool justClicked, bool mouseDown, Vector3 point) {
@@ -466,6 +471,8 @@ public class BoardScript : MonoBehaviour
                 boardTiles[i, j] = newTile;
             }
         }
+
+        tileToScale = tileParent.transform.GetChild(0).gameObject;
     }
 
     void InitBoard () {
@@ -649,11 +656,12 @@ public class BoardScript : MonoBehaviour
 
     void InitPieceSelector () {
         pieceOrderIdx = 0;
-        tileToScale = tileParent.transform.GetChild(0).gameObject;
         piecesDict = new Dictionary<string, GameObject[]>();
         pOMap = new Dictionary<GameObject, PieceObj>();
-        gameObject.GetComponent<PiecesScript>().InitPieceQuads("Good", goodPiecesParent, tileToScale, piecesDict, pOMap);
+        player = mapObj.GetComponent<MapScript>().GetPlayer();
+        gameObject.GetComponent<PiecesScript>().InitGoodPieces("Good", goodPiecesParent, tileToScale, piecesDict, pOMap, player);
         goodPiecesOnBoard = new Dictionary<string, int>();
+        pieceOrder = player.CreatePieceOrder();
         ShowPiecesOnSelector();
     }
 
@@ -739,14 +747,23 @@ public class BoardScript : MonoBehaviour
         scaledTS.transform.parent = gameObject.transform.parent;
     }
 
-    void Start()
-    {
-        playMode = 0;
-        InitBoardVars();
-        InitBoardTiles();
+    public void InitSetupPhase () {
+        gameOverText.SetActive(false);
+        continueBtn.SetActive(false);
+        DeleteAllPieces();
         InitBoard();
         InitPieceSelector();
+        ToggleSetupObjs(true);
+        playMode = 0;
+    }
+
+    void Awake()
+    {
+        InitBoardVars();
+        InitBoardTiles();
+        //InitBoard();
         InitTSlider();
+        //InitSetupPhase();
     }
 
     void Update()

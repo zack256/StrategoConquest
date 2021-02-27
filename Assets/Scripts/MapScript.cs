@@ -13,6 +13,7 @@ public class MapScript : MonoBehaviour
     private GameLevel[] gameLevels;
     private Dictionary<GameObject, GameLevel> nodeMap;
     private GameObject overNode = null;
+    private Player player;
 
     bool IsMapNode (GameObject obj) {
         return obj.transform.parent.gameObject == nodeParent;
@@ -72,10 +73,15 @@ public class MapScript : MonoBehaviour
         }
     }
     
+    public Player GetPlayer () {
+        return player;
+    }
+
     void Start () {
         //gameLevels = scriptMaster.GetComponent<NodeScript>().CreateGameLevels();
         gameLevels = gameObject.GetComponent<NodeScript>().CreateGameLevels();
         CreateNodeMap();
+        player = new Player(1000);
     }
 
     void Update () {

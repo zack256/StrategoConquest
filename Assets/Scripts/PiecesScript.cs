@@ -30,7 +30,7 @@ public class PiecesScript : MonoBehaviour
         return piecesTeamsPath + team + "/";
     }
 
-    public void InitPieceQuads (string team, GameObject piecesParent, GameObject tileToScale, Dictionary<string, GameObject[]> piecesDict, Dictionary<GameObject, PieceObj> pOMap) {
+    public void InitGoodPieces (string team, GameObject piecesParent, GameObject tileToScale, Dictionary<string, GameObject[]> piecesDict, Dictionary<GameObject, PieceObj> pOMap, Player player) {
         scriptMaster.GetComponent<ScaleScript>().ScaleGameObject(quadImgTemplate.transform.GetChild(0).gameObject, tileToScale);
         scriptMaster.GetComponent<ScaleScript>().ScaleGameObject(quadImgTemplate.transform.GetChild(1).gameObject, tileToScale);
         string localDirPath = GetTeamImagesPath(team);
@@ -39,6 +39,7 @@ public class PiecesScript : MonoBehaviour
         PieceObj po;
         GameObject quadFront;
         GameObject quadBack;
+        Dictionary<string, int> pieceQuantities = player.GetPieceAmts();
         foreach(KeyValuePair<string, int> item in pieceQuantities) {
             tex = scriptMaster.GetComponent<TextureScript>().CreateTexture(localDirPath + item.Key + ".png");
             piecesDict[item.Key] = new GameObject[item.Value];

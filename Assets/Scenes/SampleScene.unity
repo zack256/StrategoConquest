@@ -290,6 +290,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameParent: {fileID: 622722616}
   mapParent: {fileID: 791078977}
+  boardObj: {fileID: 382434857}
 --- !u!1 &74759134
 GameObject:
   m_ObjectHideFlags: 0
@@ -581,6 +582,7 @@ MonoBehaviour:
   transparentSliderQuad: {fileID: 3301077067054936808, guid: be15e88cff9cc4a5fb8eff3834f93f2f,
     type: 3}
   gameOverText: {fileID: 562420409}
+  mapObj: {fileID: 1525599577}
 --- !u!64 &382434859
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -994,7 +996,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &622722617
 Transform:
   m_ObjectHideFlags: 0
@@ -1203,7 +1205,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &791078978
 Transform:
   m_ObjectHideFlags: 0

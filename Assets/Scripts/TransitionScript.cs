@@ -14,8 +14,8 @@ public class TransitionScript : MonoBehaviour
     }
 
     public void TransitionToGame () {
-        boardObj.GetComponent<BoardScript>().CleanUpBeforeGameStart();
         mapParent.SetActive(false);
         gameParent.SetActive(true);
+        boardObj.GetComponent<BoardScript>().InitSetupPhase();
     }
 }
