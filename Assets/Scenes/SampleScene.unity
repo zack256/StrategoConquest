@@ -291,6 +291,7 @@ MonoBehaviour:
   gameParent: {fileID: 622722616}
   mapParent: {fileID: 791078977}
   boardObj: {fileID: 382434857}
+  mapObj: {fileID: 1525599577}
 --- !u!1 &74759134
 GameObject:
   m_ObjectHideFlags: 0
