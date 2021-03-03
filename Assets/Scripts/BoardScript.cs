@@ -57,6 +57,8 @@ public class BoardScript : MonoBehaviour
     private Vector2 tileDims;
     private Vector2 lowerLeft;
     private Player player;
+    private GameLevel currentLevel;
+    private int winner;
 
     bool ObjectIsTile (GameObject obj) {
         return obj.transform.parent == tileParent.transform;
@@ -291,7 +293,7 @@ public class BoardScript : MonoBehaviour
         if (obj.transform.parent == continueBtn.transform) {
             if (mouseDown) {
                 if (justClicked) {
-                    scriptMaster.GetComponent<TransitionScript>().TransitionToMap();
+                    scriptMaster.GetComponent<TransitionScript>().TransitionToMap(currentLevel, winner);
                 }
                 continueBtn.GetComponent<ControlBtns>().Highlight();
             } else {
@@ -532,16 +534,16 @@ public class BoardScript : MonoBehaviour
         }
     }
 
-    void DisplayGameOverText (int winner) {
+    void DisplayGameOverText () {
         string[] messages = new string[] {"Victory!", "Defeat!", "Tie!"};
         GameObject textObj = gameOverText.transform.GetChild(0).GetChild(0).gameObject;
         textObj.GetComponent<Text>().text = messages[winner];
         gameOverText.SetActive(true);
     }
 
-    void SetUpGameOver (int winner) {   // 0 = human, 1 = cpu, 2 = tie (?+)
+    void SetUpGameOver () {   // 0 = human, 1 = cpu, 2 = tie (?+)
         playMode = 5;
-        DisplayGameOverText(winner);
+        DisplayGameOverText();
         continueBtn.SetActive(true);
     }
 
@@ -598,7 +600,8 @@ public class BoardScript : MonoBehaviour
             CopyTo2DList(currentlyFading, new int[] {-1, -1}, fadingIdx);
             fadingObj.MoveToPos(new Vector3(40, 0, 0)); // eh
             if (fadingObj.GetValue() == "F") {
-                SetUpGameOver(0); return;
+                winner = 0;
+                SetUpGameOver(); return;
             }
             if ((previousFightResult != 1) && (fadingIdx == currentlyFading.GetLength(0) - 1)) {
                 BaseCPUTurn();
@@ -632,7 +635,8 @@ public class BoardScript : MonoBehaviour
                 board[defenderLoc[1], defenderLoc[0]] = combatant;
                 combatant.MoveToPos(fadingObj.GetMain());
                 if (fadingObj.GetValue() == "F") {
-                    SetUpGameOver(1); return;
+                    winner = 1;
+                    SetUpGameOver(); return;
                 } else {
                     StartTurning(defenderLoc);  // cpu attacked and won, so turns now.
                 }
@@ -747,7 +751,8 @@ public class BoardScript : MonoBehaviour
         scaledTS.transform.parent = gameObject.transform.parent;
     }
 
-    public void InitSetupPhase () {
+    public void InitSetupPhase (GameLevel gl) {
+        currentLevel = gl;
         gameOverText.SetActive(false);
         continueBtn.SetActive(false);
         DeleteAllPieces();

@@ -38,6 +38,7 @@ public class HighlightNode : MonoBehaviour
 
     public void SetAccessLevel (GameLevel gl) {
         accessLevel = gl.GetAccess();
+        ResetMaterial();
     }
 
     void Start () {

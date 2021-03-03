@@ -25,6 +25,14 @@ public class NodeScript : MonoBehaviour
         return new Vector3(lowerLeft.x + xCoord * (mapDims.x / 100f), lowerLeft.y + yCoord * (mapDims.y / 100f), lowerLeft.z);
     }
 
+    string[] FormatCSVLine (string line) {
+        string[] res = line.Trim().Split(',');
+        for (int i = 0; i < res.Length; i++) {
+            res[i] = res[i].Trim();
+        }
+        return res;
+    }
+
     public GameLevel[] CreateGameLevels () {
         string nodeCSVPath = Application.dataPath + "/Files/nodes.csv";
         string fileData = File.ReadAllText(nodeCSVPath);
@@ -38,7 +46,7 @@ public class NodeScript : MonoBehaviour
         GameLevel gameLvl;
         GameObject node;
         for (int i = 0; i < numLines / 3; i++) {
-            cells = lines[3 * i].Split(',');
+            cells = FormatCSVLine(lines[3 * i]);
             levelName = cells[0];
             xCoord = float.Parse(cells[1]);
             yCoord = float.Parse(cells[2]);
@@ -46,12 +54,12 @@ public class NodeScript : MonoBehaviour
             node.transform.parent = nodesParent.transform;
             gameLvl = new GameLevel(levelName, node);
             levels[i] = gameLvl;
-            andReqsLine = lines[3 * i + 1].Trim().Split(',');
+            andReqsLine = FormatCSVLine(lines[3 * i + 1]);
             gameLvl.LoadANDReqs(andReqsLine);
-            orReqsLine = lines[3 * i + 2].Trim().Split(',');
+            orReqsLine = FormatCSVLine(lines[3 * i + 2]);
             gameLvl.LoadORReqs(orReqsLine);
             gameLvl.TryToUnlockLevel();
-            node.GetComponent<HighlightNode>().SetAccessLevel(gameLvl);
+            gameLvl.RefreshNodeColor();
         }
         return levels;
     }
@@ -61,6 +69,5 @@ public class NodeScript : MonoBehaviour
     }
 
     void Start () {
-        
     }
 }

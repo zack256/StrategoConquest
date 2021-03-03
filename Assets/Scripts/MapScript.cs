@@ -41,7 +41,7 @@ public class MapScript : MonoBehaviour
             if (justClicked) {
                 GameLevel gl = nodeMap[obj];
                 if (gl.GetAccess() != 0) {
-                    scriptMaster.GetComponent<TransitionScript>().TransitionToGame();
+                    scriptMaster.GetComponent<TransitionScript>().TransitionToGame(gl);
                 }
             }
         } else {
@@ -62,9 +62,8 @@ public class MapScript : MonoBehaviour
         }
     }
 
-    void UpdateLevelAccesses (GameLevel newlyBeaten) {
+    public void UpdateLevelAccesses (GameLevel newlyBeaten) {
         GameLevel gl;
-        bool res;
         string lvlName = newlyBeaten.GetName();
         for (int i = 0; i < gameLevels.Length; i++) {
             gl = gameLevels[i];
@@ -78,7 +77,6 @@ public class MapScript : MonoBehaviour
     }
 
     void Start () {
-        //gameLevels = scriptMaster.GetComponent<NodeScript>().CreateGameLevels();
         gameLevels = gameObject.GetComponent<NodeScript>().CreateGameLevels();
         CreateNodeMap();
         player = new Player(1000);

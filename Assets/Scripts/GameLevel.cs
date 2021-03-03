@@ -28,12 +28,16 @@ public class GameLevel
 
     public void LoadANDReqs (string[] row) {
         for (int i = 1; i < row.Length; i++) {  // first col is "A"
-            andReqs.Add(row[i]);
+            if (row[i] != "") {
+                andReqs.Add(row[i]);
+            }
         }
     }
     public void LoadORReqs (string[] row) {
         for (int i = 1; i < row.Length; i++) {  // first col is "O"
-            orReqs.Add(row[i]);
+            if (row[i] != "") {
+                orReqs.Add(row[i]);
+            }
         }
     }
 
@@ -41,6 +45,7 @@ public class GameLevel
         if (accessLevel == 0) {
             accessLevel = 1;
         }
+        RefreshNodeColor();
     }
 
     void WorkOnANDReqs (string newlyBeaten) {
@@ -62,5 +67,13 @@ public class GameLevel
     public void AccountForBeatenLevel (string newlyBeaten) {
         WorkOnANDReqs(newlyBeaten);
         WorkOnORReqs(newlyBeaten);
+    }
+    
+    public void RefreshNodeColor () {
+        nodeObj.GetComponent<HighlightNode>().SetAccessLevel(this);
+    }
+
+    public static implicit operator bool(GameLevel gl) {
+        return gl != null;
     }
 }
