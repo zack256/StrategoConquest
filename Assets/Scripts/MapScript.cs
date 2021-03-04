@@ -9,6 +9,7 @@ public class MapScript : MonoBehaviour
     public GameObject cameraObject;
     public GameObject backgroundObj;
     public GameObject nodeParent;
+    public GameObject nodeTextLabel;
 
     private GameLevel[] gameLevels;
     private Dictionary<GameObject, GameLevel> nodeMap;
@@ -19,16 +20,21 @@ public class MapScript : MonoBehaviour
         return obj.transform.parent.gameObject == nodeParent;
     }
     
-    void HighlightMapNode (GameObject nodeObj, bool mouseDown) {
+    void HighlightMapNode (GameObject nodeObj, bool mouseDown, Vector3 point) {
         overNode = nodeObj;
         GameLevel gl = nodeMap[nodeObj];
         nodeObj.GetComponent<HighlightNode>().MouseOverNode(mouseDown);
+        //nodeTextLabel.GetComponent<HoverTextLabel>().ChangeText(gl.GetName());
+        //nodeTextLabel.GetComponent<HoverTextLabel>().MoveToPos(point);
+        nodeTextLabel.GetComponent<HoverTextLabel>().UpdateLabel(gl.GetName(), point);
+        nodeTextLabel.SetActive(true);
     }
 
     void ResetNodeHighlight (GameObject nodeObj) {
         if (nodeObj) {
             nodeObj.GetComponent<HighlightNode>().ResetMaterial();
             overNode = null;
+            nodeTextLabel.SetActive(false);
         }
     }
 
@@ -37,7 +43,7 @@ public class MapScript : MonoBehaviour
             if (obj != overNode) {
                 ResetNodeHighlight(overNode);
             } 
-            HighlightMapNode(obj, mouseDown);
+            HighlightMapNode(obj, mouseDown, point);
             if (justClicked) {
                 GameLevel gl = nodeMap[obj];
                 if (gl.GetAccess() != 0) {
