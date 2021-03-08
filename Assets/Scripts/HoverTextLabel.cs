@@ -39,7 +39,6 @@ public class HoverTextLabel : MonoBehaviour
         //}
         Vector3 backgroundDims = backgroundObj.GetComponent<Renderer>().bounds.size;
         Vector2 rectDims = GetRectTransformWorldDims(rt);
-        Debug.Log(rectDims.x + " , " + rectDims.y);
         float fracX = ((float) rectDims.x) / backgroundDims.x;
         float fracY = ((float) rectDims.y) / backgroundDims.y;
         backgroundObj.transform.localScale = new Vector3(backgroundObj.transform.localScale.x * fracX, backgroundObj.transform.localScale.y * fracY, backgroundObj.transform.localScale.z);

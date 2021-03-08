@@ -10,11 +10,14 @@ public class MapScript : MonoBehaviour
     public GameObject backgroundObj;
     public GameObject nodeParent;
     public GameObject nodeTextLabel;
+    public GameObject dialogueParent;
+    public GameObject quadImgTemplate;
 
     private GameLevel[] gameLevels;
     private Dictionary<GameObject, GameLevel> nodeMap;
     private GameObject overNode = null;
     private Player player;
+    private int mapMode = 0;
 
     bool IsMapNode (GameObject obj) {
         return obj.transform.parent.gameObject == nodeParent;
@@ -38,6 +41,22 @@ public class MapScript : MonoBehaviour
         }
     }
 
+    void SetUpSpeakerImage (string filename) {
+        Transform speakerTransform = dialogueParent.transform.GetChild(0);
+        Texture2D tex = scriptMaster.GetComponent<TextureScript>().CreateTexture(filename);
+        GameObject newQuadImg = Instantiate(quadImgTemplate, speakerTransform.position, Quaternion.identity);
+        scriptMaster.GetComponent<ValueLabel>().RemoveLabel(newQuadImg);
+        scriptMaster.GetComponent<ScaleScript>().ScaleGameObject(newQuadImg, speakerTransform.gameObject);
+        newQuadImg.transform.parent = speakerTransform;
+        newQuadImg.GetComponent<Renderer>().material.mainTexture = tex;
+    }
+
+    void StartDialogue (GameLevel gl) {
+        mapMode = 1;
+        dialogueParent.SetActive(true);
+        SetUpSpeakerImage(gl.GetSpeakerImgFilePath());
+    }
+
     void MouseHitGameObject (GameObject obj, bool justClicked, bool mouseDown, Vector3 point) {
         if (IsMapNode(obj)) {
             if (obj != overNode) {
@@ -47,7 +66,9 @@ public class MapScript : MonoBehaviour
             if (justClicked) {
                 GameLevel gl = nodeMap[obj];
                 if (gl.GetAccess() != 0) {
-                    scriptMaster.GetComponent<TransitionScript>().TransitionToGame(gl);
+                    nodeTextLabel.SetActive(false);
+                    StartDialogue(gl);
+                    //scriptMaster.GetComponent<TransitionScript>().TransitionToGame(gl);
                 }
             }
         } else {

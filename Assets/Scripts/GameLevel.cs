@@ -9,10 +9,22 @@ public class GameLevel
     private HashSet<string> andReqs = new HashSet<string>();
     private HashSet<string> orReqs = new HashSet<string>();
     private GameObject nodeObj;
+    private string speakerImgFilePath;
 
-    public GameLevel (string levelName, GameObject nodeObj) {
+    public GameLevel (string levelName, GameObject nodeObj, string speakerImgFileName) {
         this.levelName = levelName;
         this.nodeObj = nodeObj;
+        SetSpeakerImgPath(speakerImgFileName);
+    }
+
+    void SetSpeakerImgPath (string fileName) {
+        string assetsDir = Application.dataPath;
+        string imgsDir = assetsDir + "/Files/Images/";
+        if (fileName[0] != '~') {
+            this.speakerImgFilePath = imgsDir + "Dialogue/" + fileName + ".png";    // If no "~", uses a seperate image.
+        } else {
+            this.speakerImgFilePath = imgsDir + "Pieces/" + levelName + "/" + fileName.Substring(1) + ".png";    // If "~" in name, uses one of the pieces for dialogue
+        }
     }
 
     public string GetName () {
@@ -23,6 +35,9 @@ public class GameLevel
     }
     public GameObject GetNodeObj () {
         return this.nodeObj;
+    }
+    public string GetSpeakerImgFilePath () {
+        return this.speakerImgFilePath;
     }
 
 

@@ -45,14 +45,16 @@ public class NodeScript : MonoBehaviour
         float xCoord, yCoord;
         GameLevel gameLvl;
         GameObject node;
+        string speakerImgFileName;
         for (int i = 0; i < numLines / 3; i++) {
             cells = FormatCSVLine(lines[3 * i]);
             levelName = cells[0];
             xCoord = float.Parse(cells[1]);
             yCoord = float.Parse(cells[2]);
+            speakerImgFileName = cells[3];
             node = Instantiate(nodeTemplate, GetNodePos(xCoord, yCoord), Quaternion.identity);
             node.transform.parent = nodesParent.transform;
-            gameLvl = new GameLevel(levelName, node);
+            gameLvl = new GameLevel(levelName, node, speakerImgFileName);
             levels[i] = gameLvl;
             andReqsLine = FormatCSVLine(lines[3 * i + 1]);
             gameLvl.LoadANDReqs(andReqsLine);
