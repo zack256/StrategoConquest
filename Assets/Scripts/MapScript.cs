@@ -20,8 +20,9 @@ public class MapScript : MonoBehaviour
     private Player player;
     private int mapMode = 0;
     private GameObject dialogueTextObj;
+    private GameObject dialogueRect;
     private string[] dialoguePages;
-    private int currentPage;
+    private GameLevel goingToLvl;
 
     bool IsMapNode (GameObject obj) {
         return obj.transform.parent.gameObject == nodeParent;
@@ -55,15 +56,21 @@ public class MapScript : MonoBehaviour
         newQuadImg.GetComponent<Renderer>().material.mainTexture = tex;
     }
 
-    void StartDialogue (GameLevel gl) {
+    void StartDialogue () {
         mapMode = 1;
         dialogueParent.SetActive(true);
-        SetUpSpeakerImage(gl.GetSpeakerImgFilePath());
+        SetUpSpeakerImage(goingToLvl.GetSpeakerImgFilePath());
         
-        string dialogueText = File.ReadAllText(gl.GetDialoguePath(true));
+        string dialogueText = File.ReadAllText(goingToLvl.GetDialoguePath(true));
         string[] dialoguePages = dialogueText.Split('\n');
-        dialogueTextObj.GetComponent<DialogueScript>().LoadMsg(dialoguePages[0]);
-        currentPage = 0;
+        dialogueTextObj.GetComponent<DialogueScript>().LoadDialogue(dialoguePages);
+    }
+
+    void NextDialogue () {
+        bool done = dialogueTextObj.GetComponent<DialogueScript>().NextDialogue();
+        if (done) {
+            scriptMaster.GetComponent<TransitionScript>().TransitionToGame(goingToLvl);
+        }
     }
 
     void MouseHitGameObject (GameObject obj, bool justClicked, bool mouseDown, Vector3 point) {
@@ -76,12 +83,15 @@ public class MapScript : MonoBehaviour
                 GameLevel gl = nodeMap[obj];
                 if (gl.GetAccess() != 0) {
                     nodeTextLabel.SetActive(false);
-                    StartDialogue(gl);
-                    //scriptMaster.GetComponent<TransitionScript>().TransitionToGame(gl);
+                    goingToLvl = gl;
+                    StartDialogue();
                 }
             }
         } else {
             ResetNodeHighlight(overNode);
+            if ((obj == dialogueRect) && (mapMode == 1) && (justClicked)) {
+                NextDialogue();
+            }
         }
     }
 
@@ -116,7 +126,8 @@ public class MapScript : MonoBehaviour
         gameLevels = gameObject.GetComponent<NodeScript>().CreateGameLevels();
         CreateNodeMap();
         player = new Player(1000);
-        dialogueTextObj = dialogueParent.transform.GetChild(1).GetChild(0).GetChild(0).gameObject;
+        dialogueRect = dialogueParent.transform.GetChild(1).gameObject;
+        dialogueTextObj = dialogueRect.transform.GetChild(0).GetChild(0).gameObject;
     }
 
     void Update () {

@@ -10,32 +10,57 @@ public class DialogueScript : MonoBehaviour
     public int framesPerChar;       // ++
 
     private int charIdx = 0;
-    private string msg = "";
     private int deltaFrame;
+    private int currentPage = 0;
+    private string[] lines;
 
     void ClearText () {
         gameObject.GetComponent<Text>().text = "";
     }
 
-    public void LoadMsg (string newMsg) {
+    void LoadMsg () {
         ClearText();
-        msg = newMsg;
         charIdx = 0;
         deltaFrame = 0;
     }
 
+    public void LoadDialogue (string[] dLines) {
+        lines = dLines;
+        currentPage = 0;
+        LoadMsg();
+    }
+
+    public bool NextDialogue () {
+        if (PageFinished()) {
+            currentPage++;
+            LoadMsg();
+        } else {
+            FinishPage();
+        }
+        return DialogueFinished();
+    }
+
     void UpdateText () {
-        if (!PageFinished()) {
+        if ((!DialogueFinished() && (!PageFinished()))) {
             if (deltaFrame % framesPerChar == 0) {
-                gameObject.GetComponent<Text>().text += msg[charIdx];
+                gameObject.GetComponent<Text>().text += lines[currentPage][charIdx];
                 charIdx++;
             }
             deltaFrame++;
         }
     }
 
-    public bool PageFinished () {
-        return charIdx >= msg.Length;
+    void FinishPage () {
+        gameObject.GetComponent<Text>().text = lines[currentPage];
+        charIdx = lines[currentPage].Length;
+    }
+
+    bool PageFinished () {
+        return charIdx >= lines[currentPage].Length;
+    }
+
+    bool DialogueFinished () {
+        return currentPage >= lines.Length;
     }
 
     void Update()
