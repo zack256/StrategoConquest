@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.IO;
 
 public class MapScript : MonoBehaviour
 {
@@ -18,6 +19,9 @@ public class MapScript : MonoBehaviour
     private GameObject overNode = null;
     private Player player;
     private int mapMode = 0;
+    private GameObject dialogueTextObj;
+    private string[] dialoguePages;
+    private int currentPage;
 
     bool IsMapNode (GameObject obj) {
         return obj.transform.parent.gameObject == nodeParent;
@@ -55,6 +59,11 @@ public class MapScript : MonoBehaviour
         mapMode = 1;
         dialogueParent.SetActive(true);
         SetUpSpeakerImage(gl.GetSpeakerImgFilePath());
+        
+        string dialogueText = File.ReadAllText(gl.GetDialoguePath(true));
+        string[] dialoguePages = dialogueText.Split('\n');
+        dialogueTextObj.GetComponent<DialogueScript>().LoadMsg(dialoguePages[0]);
+        currentPage = 0;
     }
 
     void MouseHitGameObject (GameObject obj, bool justClicked, bool mouseDown, Vector3 point) {
@@ -107,6 +116,7 @@ public class MapScript : MonoBehaviour
         gameLevels = gameObject.GetComponent<NodeScript>().CreateGameLevels();
         CreateNodeMap();
         player = new Player(1000);
+        dialogueTextObj = dialogueParent.transform.GetChild(1).GetChild(0).GetChild(0).gameObject;
     }
 
     void Update () {

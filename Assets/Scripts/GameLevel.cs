@@ -10,11 +10,20 @@ public class GameLevel
     private HashSet<string> orReqs = new HashSet<string>();
     private GameObject nodeObj;
     private string speakerImgFilePath;
+    private string[] dialoguePaths;
 
     public GameLevel (string levelName, GameObject nodeObj, string speakerImgFileName) {
         this.levelName = levelName;
         this.nodeObj = nodeObj;
         SetSpeakerImgPath(speakerImgFileName);
+        InitDialoguePaths();
+    }
+
+    void InitDialoguePaths () {
+        string dialoguesPath = Application.dataPath + "/Files/Dialogue/Levels/" + GetName();
+        string beforeDialoguePath = dialoguesPath + "/before.txt";
+        string afterDialoguePath = dialoguesPath + "/after.txt";    // 2 for now.
+        dialoguePaths = new string[] {beforeDialoguePath, afterDialoguePath};
     }
 
     void SetSpeakerImgPath (string fileName) {
@@ -38,6 +47,10 @@ public class GameLevel
     }
     public string GetSpeakerImgFilePath () {
         return this.speakerImgFilePath;
+    }
+    public string GetDialoguePath (bool isBefore) {
+        int idx = isBefore ? 0 : 1;
+        return dialoguePaths[idx];
     }
 
 
