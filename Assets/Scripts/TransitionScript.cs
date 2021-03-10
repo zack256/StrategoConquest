@@ -12,9 +12,7 @@ public class TransitionScript : MonoBehaviour
     public void TransitionToMap (GameLevel gl, int winner) {
         gameParent.SetActive(false);
         mapParent.SetActive(true);
-        if (winner == 0) {  // human won
-            mapObj.GetComponent<MapScript>().UpdateLevelAccesses(gl);
-        }
+        mapObj.GetComponent<MapScript>().HandleBattleEnd(winner);
     }
 
     public void TransitionToGame (GameLevel gl) {

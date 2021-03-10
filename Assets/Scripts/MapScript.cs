@@ -56,20 +56,51 @@ public class MapScript : MonoBehaviour
         newQuadImg.GetComponent<Renderer>().material.mainTexture = tex;
     }
 
-    void StartDialogue () {
-        mapMode = 1;
+    bool StartDialogue (string whichDialogue) {
+        string dialoguePath = goingToLvl.GetDialoguePath(whichDialogue);
+        if (!File.Exists(dialoguePath)) {   // dialogues arent required
+            return false;
+        }
         dialogueParent.SetActive(true);
         SetUpSpeakerImage(goingToLvl.GetSpeakerImgFilePath());
-        
-        string dialogueText = File.ReadAllText(goingToLvl.GetDialoguePath(true));
+        string dialogueText = File.ReadAllText(dialoguePath);
         string[] dialoguePages = dialogueText.Split('\n');
         dialogueTextObj.GetComponent<DialogueScript>().LoadDialogue(dialoguePages);
+        return true;
+    }
+
+    void TransitionToGame() {
+        scriptMaster.GetComponent<TransitionScript>().TransitionToGame(goingToLvl);
     }
 
     void NextDialogue () {
         bool done = dialogueTextObj.GetComponent<DialogueScript>().NextDialogue();
         if (done) {
-            scriptMaster.GetComponent<TransitionScript>().TransitionToGame(goingToLvl);
+            if (mapMode == 1) { // dialogue before battle
+                TransitionToGame();
+            } else if (mapMode == 2) {  // after battle
+                dialogueParent.SetActive(false);
+                mapMode = 0;
+            }
+        }
+    }
+
+    public void HandleBattleEnd (int winner) {
+        string winRes;
+        if (winner == 0) {  // human won
+            UpdateLevelAccesses(goingToLvl);
+            winRes = "victory";
+        } else if (winner == 1) {   // lost
+            winRes = "defeat";
+        } else {    // tie
+            winRes = "tie";
+        }
+        bool dialogueStarted = StartDialogue(winRes);
+        if (dialogueStarted) {
+            mapMode = 2;
+        } else {
+            dialogueParent.SetActive(false);
+            mapMode = 0;
         }
     }
 
@@ -84,12 +115,16 @@ public class MapScript : MonoBehaviour
                 if (gl.GetAccess() != 0) {
                     nodeTextLabel.SetActive(false);
                     goingToLvl = gl;
-                    StartDialogue();
+                    mapMode = 1;
+                    bool dialogueStarted = StartDialogue("before");
+                    if (!dialogueStarted) {
+                        TransitionToGame();
+                    }
                 }
             }
         } else {
             ResetNodeHighlight(overNode);
-            if ((obj == dialogueRect) && (mapMode == 1) && (justClicked)) {
+            if ((obj == dialogueRect) && ((mapMode == 1) || (mapMode == 2)) && (justClicked)) {
                 NextDialogue();
             }
         }
