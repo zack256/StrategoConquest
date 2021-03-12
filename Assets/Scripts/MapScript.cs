@@ -23,6 +23,7 @@ public class MapScript : MonoBehaviour
     private GameObject dialogueRect;
     private string[] dialoguePages;
     private GameLevel goingToLvl;
+    private GameObject speakerImgQuad;
 
     bool IsMapNode (GameObject obj) {
         return obj.transform.parent.gameObject == nodeParent;
@@ -47,13 +48,8 @@ public class MapScript : MonoBehaviour
     }
 
     void SetUpSpeakerImage (string filename) {
-        Transform speakerTransform = dialogueParent.transform.GetChild(0);
         Texture2D tex = scriptMaster.GetComponent<TextureScript>().CreateTexture(filename);
-        GameObject newQuadImg = Instantiate(quadImgTemplate, speakerTransform.position, Quaternion.identity);
-        scriptMaster.GetComponent<ValueLabel>().RemoveLabel(newQuadImg);
-        scriptMaster.GetComponent<ScaleScript>().ScaleGameObject(newQuadImg, speakerTransform.gameObject);
-        newQuadImg.transform.parent = speakerTransform;
-        newQuadImg.GetComponent<Renderer>().material.mainTexture = tex;
+        speakerImgQuad.GetComponent<Renderer>().material.mainTexture = tex;
     }
 
     bool StartDialogue (string whichDialogue) {
@@ -88,6 +84,7 @@ public class MapScript : MonoBehaviour
     public void HandleBattleEnd (int winner) {
         string winRes;
         if (winner == 0) {  // human won
+            goingToLvl.BeatLevel();
             UpdateLevelAccesses(goingToLvl);
             winRes = "victory";
         } else if (winner == 1) {   // lost
@@ -157,12 +154,21 @@ public class MapScript : MonoBehaviour
         return player;
     }
 
+    void InitSpeakerSetup () {
+        Transform speakerTransform = dialogueParent.transform.GetChild(0);
+        speakerImgQuad = Instantiate(quadImgTemplate, speakerTransform.position, Quaternion.identity);
+        speakerImgQuad.transform.parent = speakerTransform;
+        scriptMaster.GetComponent<ValueLabel>().RemoveLabel(speakerImgQuad);
+        scriptMaster.GetComponent<ScaleScript>().ScaleGameObject(speakerImgQuad, dialogueParent.transform.GetChild(0).gameObject);
+    }
+
     void Start () {
         gameLevels = gameObject.GetComponent<NodeScript>().CreateGameLevels();
         CreateNodeMap();
         player = new Player(1000);
         dialogueRect = dialogueParent.transform.GetChild(1).gameObject;
         dialogueTextObj = dialogueRect.transform.GetChild(0).GetChild(0).gameObject;
+        InitSpeakerSetup();
     }
 
     void Update () {

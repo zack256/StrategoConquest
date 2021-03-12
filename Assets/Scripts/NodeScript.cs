@@ -41,27 +41,32 @@ public class NodeScript : MonoBehaviour
         //MapNode[] mapNodes = new MapNode[numLines / 3]; // data for each node comprises 3 lines.
         GameLevel[] levels = new GameLevel[numLines / 3];
         string[] cells, andReqsLine, orReqsLine;
-        string levelName;
+        string levelName, levelType;
         float xCoord, yCoord;
         GameLevel gameLvl;
         GameObject node;
         string speakerImgFileName;
         for (int i = 0; i < numLines / 3; i++) {
             cells = FormatCSVLine(lines[3 * i]);
-            levelName = cells[0];
-            xCoord = float.Parse(cells[1]);
-            yCoord = float.Parse(cells[2]);
-            speakerImgFileName = cells[3];
-            node = Instantiate(nodeTemplate, GetNodePos(xCoord, yCoord), Quaternion.identity);
-            node.transform.parent = nodesParent.transform;
-            gameLvl = new GameLevel(levelName, node, speakerImgFileName);
-            levels[i] = gameLvl;
-            andReqsLine = FormatCSVLine(lines[3 * i + 1]);
-            gameLvl.LoadANDReqs(andReqsLine);
-            orReqsLine = FormatCSVLine(lines[3 * i + 2]);
-            gameLvl.LoadORReqs(orReqsLine);
-            gameLvl.TryToUnlockLevel();
-            gameLvl.RefreshNodeColor();
+            levelType = cells[0];
+            if (levelType == "Level") {
+                levelName = cells[1];
+                xCoord = float.Parse(cells[2]);
+                yCoord = float.Parse(cells[3]);
+                speakerImgFileName = cells[4];
+                node = Instantiate(nodeTemplate, GetNodePos(xCoord, yCoord), Quaternion.identity);
+                node.transform.parent = nodesParent.transform;
+                gameLvl = new GameLevel(levelName, node, speakerImgFileName);
+                levels[i] = gameLvl;
+                andReqsLine = FormatCSVLine(lines[3 * i + 1]);
+                gameLvl.LoadANDReqs(andReqsLine);
+                orReqsLine = FormatCSVLine(lines[3 * i + 2]);
+                gameLvl.LoadORReqs(orReqsLine);
+                gameLvl.TryToUnlockLevel();
+                gameLvl.RefreshNodeColor();
+            } else {
+
+            }
         }
         return levels;
     }

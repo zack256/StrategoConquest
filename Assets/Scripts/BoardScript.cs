@@ -256,7 +256,7 @@ public class BoardScript : MonoBehaviour
                 if (justClicked && canConfirm) {
                     ToggleSetupObjs(false);
                     string[,] enemyValues = scriptMaster.GetComponent<InitEnemy>().InitPieces();
-                    gameObject.GetComponent<PiecesScript>().InitEnemyPieces(boardPiecesParent, board, enemyValues, gameObject, "farm");
+                    gameObject.GetComponent<PiecesScript>().InitEnemyPieces(boardPiecesParent, board, enemyValues, gameObject, currentLevel.GetName());
                     playMode = 1;
                 }
             } else {
