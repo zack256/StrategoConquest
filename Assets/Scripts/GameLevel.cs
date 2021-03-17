@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class GameLevel : MapNode
 {
-    public GameLevel (string levelName, GameObject nodeObj, string speakerImgFileName) : base(levelName, nodeObj, speakerImgFileName) {
+    public GameLevel (string levelName, GameObject nodeObj, string speakerImgFileName) : base(levelName, nodeObj, speakerImgFileName, 0) {
     }
 
-    public void BeatLevel () {
-        SetAccess(2);   // defetated
+    public override void BeatLevel () {
+        SetAccess(2);   // defeated
         RefreshNodeColor();
     }
 }

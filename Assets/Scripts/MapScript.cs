@@ -25,7 +25,7 @@ public class MapScript : MonoBehaviour
     private GameObject dialogueTextObj;
     private GameObject dialogueRect;
     private string[] dialoguePages;
-    private GameLevel goingToLvl;
+    private MapNode goingToLvl;
     private GameObject speakerImgQuad;
 
     bool IsMapNode (GameObject obj) {
@@ -75,15 +75,20 @@ public class MapScript : MonoBehaviour
         return true;
     }
 
-    void TransitionToGame() {
-        scriptMaster.GetComponent<TransitionScript>().TransitionToGame(goingToLvl);
+    void TransitionToGameOrShop () {
+        int levelType = goingToLvl.GetLevelType();
+        if (levelType == 0) {
+            scriptMaster.GetComponent<TransitionScript>().TransitionToGame(goingToLvl);
+        } else if (levelType == 1) {
+            scriptMaster.GetComponent<TransitionScript>().TransitionToShop(goingToLvl);
+        }
     }
 
     void NextDialogue () {
         bool done = dialogueTextObj.GetComponent<DialogueScript>().NextDialogue();
         if (done) {
             if (mapMode == 1) { // dialogue before battle
-                TransitionToGame();
+                TransitionToGameOrShop();
             } else if (mapMode == 2) {  // after battle
                 dialogueParent.SetActive(false);
                 mapMode = 0;
@@ -120,18 +125,26 @@ public class MapScript : MonoBehaviour
             if (justClicked) {
                 if (gameLevelnodeMap.ContainsKey(obj)) {
                     GameLevel gl = gameLevelnodeMap[obj];
-                    if (gl.GetAccess() != 0) {
+                    if (gl.CanVisit()) {
                         nodeTextLabel.SetActive(false);
                         goingToLvl = gl;
                         mapMode = 1;
                         bool dialogueStarted = StartDialogue("before");
                         if (!dialogueStarted) {
-                            TransitionToGame();
+                            TransitionToGameOrShop();
                         }
                     }
                 } else {
                     ShopLevel sl = shopLevelnodeMap[obj];
-                    Debug.Log("@ shop " + sl.GetName());
+                    if (sl.CanVisit()) {
+                        nodeTextLabel.SetActive(false);
+                        goingToLvl = sl;
+                        mapMode = 1;
+                        bool dialogueStarted = StartDialogue("before");
+                        if (!dialogueStarted) {
+                            TransitionToGameOrShop();
+                        }
+                    }
                 }
             }
         } else {
@@ -161,7 +174,7 @@ public class MapScript : MonoBehaviour
         }
     }
 
-    public void UpdateLevelAccesses (GameLevel newlyBeaten) {
+    public void UpdateLevelAccesses (MapNode newlyBeaten) {
         GameLevel gl;
         string lvlName = newlyBeaten.GetName();
         for (int i = 0; i < gameLevels.Length; i++) {

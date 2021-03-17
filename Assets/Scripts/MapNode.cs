@@ -10,11 +10,13 @@ public class MapNode
     private HashSet<string> orReqs = new HashSet<string>();
     private GameObject nodeObj;
     private string speakerImgFilePath;
+    private int levelType;
 
-    public MapNode (string levelName, GameObject nodeObj, string speakerImgFileName) {
+    public MapNode (string levelName, GameObject nodeObj, string speakerImgFileName, int levelType) {
         this.levelName = levelName;
         this.nodeObj = nodeObj;
         SetSpeakerImgPath(speakerImgFileName);
+        this.levelType = levelType;
     }
 
     void SetSpeakerImgPath (string fileName) {
@@ -27,6 +29,9 @@ public class MapNode
         }
     }
 
+    public int GetLevelType () {
+        return levelType;
+    }
     public string GetName () {
         return this.levelName;
     }
@@ -93,6 +98,13 @@ public class MapNode
     
     public void RefreshNodeColor () {
         nodeObj.GetComponent<HighlightNode>().SetAccessLevel(this);
+    }
+
+    public bool CanVisit () {
+        return accessLevel != 0;
+    }
+
+    public virtual void BeatLevel () {  // eh...
     }
 
     public static implicit operator bool(MapNode gl) {

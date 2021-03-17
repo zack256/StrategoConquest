@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ShopLevel : MapNode
 {
-    public ShopLevel (string levelName, GameObject nodeObj, string speakerImgFileName) : base(levelName, nodeObj, speakerImgFileName) {
+    public ShopLevel (string levelName, GameObject nodeObj, string speakerImgFileName) : base(levelName, nodeObj, speakerImgFileName, 1) {
     }
 
     public override string GetHoverLabelMessage () {

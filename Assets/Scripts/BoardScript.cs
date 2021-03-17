@@ -57,7 +57,7 @@ public class BoardScript : MonoBehaviour
     private Vector2 tileDims;
     private Vector2 lowerLeft;
     private Player player;
-    private GameLevel currentLevel;
+    private MapNode currentLevel;
     private int winner;
 
     bool ObjectIsTile (GameObject obj) {
@@ -293,7 +293,7 @@ public class BoardScript : MonoBehaviour
         if (obj.transform.parent == continueBtn.transform) {
             if (mouseDown) {
                 if (justClicked) {
-                    scriptMaster.GetComponent<TransitionScript>().TransitionToMap(currentLevel, winner);
+                    scriptMaster.GetComponent<TransitionScript>().TransitionToMap(winner);
                 }
                 continueBtn.GetComponent<ControlBtns>().Highlight();
             } else {
@@ -751,7 +751,7 @@ public class BoardScript : MonoBehaviour
         scaledTS.transform.parent = gameObject.transform.parent;
     }
 
-    public void InitSetupPhase (GameLevel gl) {
+    public void InitSetupPhase (MapNode gl) {   // gl should be a gamelevel :)
         currentLevel = gl;
         gameOverText.SetActive(false);
         continueBtn.SetActive(false);
