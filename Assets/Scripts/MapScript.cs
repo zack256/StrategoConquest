@@ -15,7 +15,10 @@ public class MapScript : MonoBehaviour
     public GameObject quadImgTemplate;
 
     private GameLevel[] gameLevels;
-    private Dictionary<GameObject, GameLevel> nodeMap;
+    private ShopLevel[] shopLevels;
+    //private Dictionary<GameObject, MapNode> nodeMap;  // maybe try and figure out later :)
+    private Dictionary<GameObject, GameLevel> gameLevelnodeMap;
+    private Dictionary<GameObject, ShopLevel> shopLevelnodeMap;
     private GameObject overNode = null;
     private Player player;
     private int mapMode = 0;
@@ -31,11 +34,18 @@ public class MapScript : MonoBehaviour
     
     void HighlightMapNode (GameObject nodeObj, bool mouseDown, Vector3 point) {
         overNode = nodeObj;
-        GameLevel gl = nodeMap[nodeObj];
+        //GameLevel gl = nodeMap[nodeObj];
+        MapNode mn;
+        if (gameLevelnodeMap.ContainsKey(nodeObj)) {
+            mn = gameLevelnodeMap[nodeObj];
+        } else {
+            mn = shopLevelnodeMap[nodeObj];
+        }
         nodeObj.GetComponent<HighlightNode>().MouseOverNode(mouseDown);
         //nodeTextLabel.GetComponent<HoverTextLabel>().ChangeText(gl.GetName());
         //nodeTextLabel.GetComponent<HoverTextLabel>().MoveToPos(point);
-        nodeTextLabel.GetComponent<HoverTextLabel>().UpdateLabel(gl.GetName(), point);
+        //nodeTextLabel.GetComponent<HoverTextLabel>().UpdateLabel(gl.GetName(), point);
+        nodeTextLabel.GetComponent<HoverTextLabel>().UpdateLabel(mn.GetHoverLabelMessage(), point);
         nodeTextLabel.SetActive(true);
     }
 
@@ -108,15 +118,20 @@ public class MapScript : MonoBehaviour
             } 
             HighlightMapNode(obj, mouseDown, point);
             if (justClicked) {
-                GameLevel gl = nodeMap[obj];
-                if (gl.GetAccess() != 0) {
-                    nodeTextLabel.SetActive(false);
-                    goingToLvl = gl;
-                    mapMode = 1;
-                    bool dialogueStarted = StartDialogue("before");
-                    if (!dialogueStarted) {
-                        TransitionToGame();
+                if (gameLevelnodeMap.ContainsKey(obj)) {
+                    GameLevel gl = gameLevelnodeMap[obj];
+                    if (gl.GetAccess() != 0) {
+                        nodeTextLabel.SetActive(false);
+                        goingToLvl = gl;
+                        mapMode = 1;
+                        bool dialogueStarted = StartDialogue("before");
+                        if (!dialogueStarted) {
+                            TransitionToGame();
+                        }
                     }
+                } else {
+                    ShopLevel sl = shopLevelnodeMap[obj];
+                    Debug.Log("@ shop " + sl.GetName());
                 }
             }
         } else {
@@ -133,10 +148,16 @@ public class MapScript : MonoBehaviour
 
     void CreateNodeMap () {
         GameLevel gl;
-        nodeMap = new Dictionary<GameObject, GameLevel>();
+        gameLevelnodeMap = new Dictionary<GameObject, GameLevel>();
         for (int i = 0; i < gameLevels.Length; i++) {
             gl = gameLevels[i];
-            nodeMap[gl.GetNodeObj()] = gl;
+            gameLevelnodeMap[gl.GetNodeObj()] = gl;
+        }
+        ShopLevel sl;
+        shopLevelnodeMap = new Dictionary<GameObject, ShopLevel>();
+        for (int i = 0; i < shopLevels.Length; i++) {
+            sl = shopLevels[i];
+            shopLevelnodeMap[sl.GetNodeObj()] = sl;
         }
     }
 
@@ -147,6 +168,12 @@ public class MapScript : MonoBehaviour
             gl = gameLevels[i];
             gl.AccountForBeatenLevel(lvlName);
             gl.TryToUnlockLevel();
+        }
+        ShopLevel sl;
+        for (int i = 0; i < shopLevels.Length; i++) {
+            sl = shopLevels[i];
+            sl.AccountForBeatenLevel(lvlName);
+            sl.TryToUnlockLevel();
         }
     }
     
@@ -164,6 +191,7 @@ public class MapScript : MonoBehaviour
 
     void Start () {
         gameLevels = gameObject.GetComponent<NodeScript>().CreateGameLevels();
+        shopLevels = gameObject.GetComponent<NodeScript>().CreateShopLevels();
         CreateNodeMap();
         player = new Player(1000);
         dialogueRect = dialogueParent.transform.GetChild(1).gameObject;

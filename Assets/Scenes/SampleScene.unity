@@ -1892,7 +1892,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96b6865425a9f4b50ad47d6898475673, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nodeTemplate: {fileID: 6934241592997046656, guid: 6eb9aa62e6d524ee1afcbc759f9c0279,
+  gameLevelNodeTemplate: {fileID: 6934241592997046656, guid: 6eb9aa62e6d524ee1afcbc759f9c0279,
+    type: 3}
+  shopLevelNodeTemplate: {fileID: 1543870957480822700, guid: 0910b41c5dbaf4e91869fc29619fb6f4,
     type: 3}
   nodesParent: {fileID: 7379067}
 --- !u!114 &1525599583

@@ -45,7 +45,9 @@ public class MapNode
     public string GetDialoguePath (string which) {
         return Application.dataPath + "/Files/Dialogue/Levels/" + GetName() + "/" + which + ".txt";
     }
-
+    public virtual string GetHoverLabelMessage () {
+        return GetName();
+    }
     public void LoadANDReqs (string[] row) {
         for (int i = 1; i < row.Length; i++) {  // first col is "A"
             if (row[i] != "") {
