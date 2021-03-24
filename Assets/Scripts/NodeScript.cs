@@ -9,9 +9,12 @@ public class NodeScript : MonoBehaviour
     public GameObject gameLevelNodeTemplate;
     public GameObject shopLevelNodeTemplate;
     public GameObject nodesParent;
+    public GameObject scriptMaster;
+    public GameObject pieceObjTemplate;
 
     private Vector3 lowerLeft;
     private Vector3 mapDims;
+    private Utils utilsScript;
 
     private void CalculateMapProps () {
         Vector3 pos = gameObject.transform.position;
@@ -26,16 +29,8 @@ public class NodeScript : MonoBehaviour
         return new Vector3(lowerLeft.x + xCoord * (mapDims.x / 100f), lowerLeft.y + yCoord * (mapDims.y / 100f), lowerLeft.z);
     }
 
-    string[] FormatCSVLine (string line) {
-        string[] res = line.Trim().Split(',');
-        for (int i = 0; i < res.Length; i++) {
-            res[i] = res[i].Trim();
-        }
-        return res;
-    }
-
     public GameLevel[] CreateGameLevels () {
-        string nodeCSVPath = Application.dataPath + "/Files/game_levels.csv";
+        string nodeCSVPath = Application.dataPath + "/Files/Map/game_levels.csv";
         string fileData = File.ReadAllText(nodeCSVPath);
         string[] lines = fileData.Split('\n');
         int numLines = lines.Length;
@@ -47,7 +42,7 @@ public class NodeScript : MonoBehaviour
         GameObject node;
         string speakerImgFileName;
         for (int i = 0; i < numLines / 3; i++) {
-            cells = FormatCSVLine(lines[3 * i]);
+            cells = utilsScript.FormatCSVLine(lines[3 * i]);
             levelName = cells[0];
             xCoord = float.Parse(cells[1]);
             yCoord = float.Parse(cells[2]);
@@ -56,9 +51,9 @@ public class NodeScript : MonoBehaviour
             node.transform.parent = nodesParent.transform;
             gameLvl = new GameLevel(levelName, node, speakerImgFileName);
             levels[i] = gameLvl;
-            andReqsLine = FormatCSVLine(lines[3 * i + 1]);
+            andReqsLine = utilsScript.FormatCSVLine(lines[3 * i + 1]);
             gameLvl.LoadANDReqs(andReqsLine);
-            orReqsLine = FormatCSVLine(lines[3 * i + 2]);
+            orReqsLine = utilsScript.FormatCSVLine(lines[3 * i + 2]);
             gameLvl.LoadORReqs(orReqsLine);
             gameLvl.TryToUnlockLevel();
             gameLvl.RefreshNodeColor();
@@ -67,7 +62,7 @@ public class NodeScript : MonoBehaviour
     }
 
     public ShopLevel[] CreateShopLevels () {
-        string nodeCSVPath = Application.dataPath + "/Files/shops.csv";
+        string nodeCSVPath = Application.dataPath + "/Files/Map/shops.csv";
         string fileData = File.ReadAllText(nodeCSVPath);
         string[] lines = fileData.Split('\n');
         int numLines = lines.Length;
@@ -78,8 +73,10 @@ public class NodeScript : MonoBehaviour
         ShopLevel shopLvl;
         GameObject node;
         string speakerImgFileName;
+        ValueLabel valueLabelScript = scriptMaster.GetComponent<ValueLabel>();
+        TextureScript textureScript = scriptMaster.GetComponent<TextureScript>();
         for (int i = 0; i < numLines / 3; i++) {
-            cells = FormatCSVLine(lines[3 * i]);
+            cells = utilsScript.FormatCSVLine(lines[3 * i]);
             levelName = cells[0];
             xCoord = float.Parse(cells[1]);
             yCoord = float.Parse(cells[2]);
@@ -87,10 +84,11 @@ public class NodeScript : MonoBehaviour
             node = Instantiate(shopLevelNodeTemplate, GetNodePos(xCoord, yCoord), Quaternion.identity);
             node.transform.parent = nodesParent.transform;
             shopLvl = new ShopLevel(levelName, node, speakerImgFileName);
+            shopLvl.InitStock(utilsScript, valueLabelScript, textureScript, pieceObjTemplate);
             levels[i] = shopLvl;
-            andReqsLine = FormatCSVLine(lines[3 * i + 1]);
+            andReqsLine = utilsScript.FormatCSVLine(lines[3 * i + 1]);
             shopLvl.LoadANDReqs(andReqsLine);
-            orReqsLine = FormatCSVLine(lines[3 * i + 2]);
+            orReqsLine = utilsScript.FormatCSVLine(lines[3 * i + 2]);
             shopLvl.LoadORReqs(orReqsLine);
             shopLvl.TryToUnlockLevel();
             shopLvl.RefreshNodeColor();
@@ -103,5 +101,6 @@ public class NodeScript : MonoBehaviour
     }
 
     void Start () {
+        utilsScript = scriptMaster.GetComponent<Utils>();
     }
 }

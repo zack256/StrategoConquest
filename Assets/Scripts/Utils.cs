@@ -16,4 +16,12 @@ public class Utils : MonoBehaviour
             arr[i] = temp;
         }
     }
+
+    public string[] FormatCSVLine (string line) {
+        string[] res = line.Trim().Split(',');
+        for (int i = 0; i < res.Length; i++) {
+            res[i] = res[i].Trim();
+        }
+        return res;
+    }
 }

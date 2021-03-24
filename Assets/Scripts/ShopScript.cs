@@ -7,6 +7,11 @@ public class ShopScript : MonoBehaviour
 
     public GameObject cameraObject;
     public GameObject backgroundObj;
+    //public GameObject descWindow;
+    public GameObject scriptMaster;
+
+    private MapNode shopLevel;
+    private Utils utilsScript;
 
     void MouseHitGameObject (GameObject obj, bool justClicked, bool mouseDown, Vector3 point) {
 
@@ -15,12 +20,23 @@ public class ShopScript : MonoBehaviour
     void MouseHitNoGameObject (bool justClicked, bool mouseDown, Vector3 point) {
     }
 
+    string[] FormatCSVLine (string line) {  // probably should combine these into a utils file
+        string[] res = line.Trim().Split(',');
+        for (int i = 0; i < res.Length; i++) {
+            res[i] = res[i].Trim();
+        }
+        return res;
+    }
+
     public void SetUpShop (MapNode sl) {
+        gameObject.SetActive(true);
+        //descWindow.SetActive(true);
+        shopLevel = sl;
     }
 
     void Start()
     {
-        
+        utilsScript = scriptMaster.GetComponent<Utils>();
     }
 
     void Update () {
