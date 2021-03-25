@@ -106,6 +106,8 @@ public class MapNode
 
     public virtual void BeatLevel () {  // eh...
     }
+    public virtual List<PieceObj> GetPiecesStock () { return null; }
+    public virtual List<ItemObj> GetItemsStock () { return null; }
 
     public static implicit operator bool(MapNode gl) {
         return gl != null;

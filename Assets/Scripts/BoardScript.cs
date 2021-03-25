@@ -415,7 +415,7 @@ public class BoardScript : MonoBehaviour
         if ((obj == pieceMenuUpArrow) || (obj == pieceMenuDownArrow)) {
             ResetHighlighted(obj);
             currentlyOver = obj;
-            if (!pieceScrollDisabled) { // maybe fine if just lights up.
+            if (!pieceScrollDisabled) {
                 if (mouseDown) {
                     currentlyOver.GetComponent<Highlight2D>().MouseClicking();
                 } else {

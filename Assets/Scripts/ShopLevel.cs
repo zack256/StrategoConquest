@@ -32,8 +32,6 @@ public class ShopLevel : MapNode
         quadFront.GetComponent<Renderer>().material.mainTexture = tex;
     }
 
-    
-
     public void InitStock (Utils utilsScript, ValueLabel valueLabelScript, TextureScript textureScript, GameObject pieceObjTemplate) {
         string stockPath = Application.dataPath + "/Files/Shops/Stocks/" + GetName() + ".csv";;
         string fileData = File.ReadAllText(stockPath);
@@ -62,10 +60,10 @@ public class ShopLevel : MapNode
         }
     }
 
-    public List<PieceObj> GetPiecesStock () {
+    public override List<PieceObj> GetPiecesStock () {
         return piecesStock;
     }
-    public List<ItemObj> GetItemsStock () {
+    public override List<ItemObj> GetItemsStock () {
         return itemsStock;
     }
 
